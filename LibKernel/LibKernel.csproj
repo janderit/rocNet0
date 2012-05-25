@@ -41,20 +41,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Caching\InMemoryCache.cs" />
-    <Compile Include="Implementation\InProcessKernel.cs" />
+    <Compile Include="ResponseHeaders.cs" />
+    <Compile Include="IRegisterRoutes.cs" />
     <Compile Include="Kernel.cs" />
+    <Compile Include="MediaFormats\ZeroMqDatagramFormatter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Provider\StaticFileProvider.cs" />
     <Compile Include="ResourceRepresentation.cs" />
     <Compile Include="ResourceRequest.cs" />
-    <Compile Include="Routing\IRegisterRoutes.cs" />
-    <Compile Include="Routing\RegexRouteEntry.cs" />
-    <Compile Include="Routing\ImmediateRouteEntry.cs" />
-    <Compile Include="Routing\RouteEntry.cs" />
-    <Compile Include="Routing\Router.cs" />
+    <Compile Include="ResourceRequestHeaders.cs" />
+    <Compile Include="Response.cs" />
+    <Compile Include="ResponseCode.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="MediaFormats\" />
     <Folder Include="MediaTypes\" />
     <Folder Include="Transports\" />
   </ItemGroup>

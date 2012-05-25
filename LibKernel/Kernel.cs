@@ -7,7 +7,12 @@ namespace LibKernel
 {
     public interface Kernel
     {
-        ResourceRepresentation Get(ResourceRequest request);
+
+        Response Get(ResourceRequest request);
+        
+        void Get(ResourceRequest request, Action<Response> response);
+        void Get(ResourceRequest request, Action<ResourceRepresentation> resource, Action<Response> onFailure);
+        
     }
 
     public interface KernelConfigurator

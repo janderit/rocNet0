@@ -44,7 +44,7 @@ namespace KernelTests.Basic_Functionality
                                     {
                                         NetResourceLocator = "net://fib/" + p,
                                         AcceptableMediaTypes = new[] {"text/longint"}
-                                    }).Body);
+                                    }).Resource.Body);
         }
 
         private ResourceRepresentation ServeFibonacci(ResourceRequest req)

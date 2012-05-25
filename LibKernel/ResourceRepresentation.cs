@@ -5,8 +5,17 @@ using System.Text;
 
 namespace LibKernel
 {
-    public struct ResourceRepresentation
+    public class ResourceRepresentation
     {
+        public ResourceRepresentation()
+        {
+            Relations = new List<string>();
+            Via = new List<string>();
+            RevokationTokens = new List<Guid>();
+            Correlations = new List<Guid>();
+        }
+
+
         public string NetResourceIdentifier;
         public string MediaType;
         public IEnumerable<string> Relations;
