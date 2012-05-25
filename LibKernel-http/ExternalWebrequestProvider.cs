@@ -14,7 +14,7 @@ namespace LibKernel_http
         public void Register(KernelRegistration kernel)
         {
             kernel.Routes.DeleteRoute(MyGuid);
-            kernel.Routes.RegisterRegex(MyGuid, "^http://.+", 50, Get);
+            kernel.Routes.RegisterResourceHandlerRegex(MyGuid, "^http://.+", 50, Get);
         }
 
         public ResourceRepresentation Get(ResourceRequest request)

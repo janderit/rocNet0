@@ -29,13 +29,13 @@ namespace KernelTests.ZeroMq_Transport
 
             _kernel = new InProcessKernel();
             var plugin = new ZeroMqResourceProviderConnector("tcp://localhost:15700");
-            _kernel.Routes.RegisterImmediate(Guid.NewGuid(), "net://test", 10, r => plugin.Get(r).Resource);
+            _kernel.Routes.RegisterResourceHandler(Guid.NewGuid(), "net://test", 10, r => plugin.Get(r).Resource);
         }
 
         private void StartProvider()
         {
             var s = new InProcessKernel();
-            s.Routes.RegisterImmediate(Guid.NewGuid(), "net://test", 0, r => new ResourceRepresentation { NetResourceIdentifier="net://test" ,MediaType="text",Body = "Hello World" });
+            s.Routes.RegisterResourceHandler(Guid.NewGuid(), "net://test", 0, r => new ResourceRepresentation { NetResourceIdentifier="net://test" ,MediaType="text",Body = "Hello World" });
             _service = s;
             _provider = new ZeroMqResourceProviderFacade(_service, "tcp://127.0.0.1:15700");
             _provider.Start();

@@ -44,7 +44,7 @@
     <Compile Include="Provider\IProvideResources.cs" />
     <Compile Include="Provider\RouteInfo.cs" />
     <Compile Include="ResponseHeaders.cs" />
-    <Compile Include="IRegisterRoutes.cs" />
+    <Compile Include="ResourceRegistry.cs" />
     <Compile Include="ResourceProvider.cs" />
     <Compile Include="MediaFormats\ZeroMqDatagramFormatter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

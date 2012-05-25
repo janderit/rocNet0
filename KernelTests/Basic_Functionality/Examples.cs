@@ -32,7 +32,7 @@ namespace KernelTests.Basic_Functionality
         [Test]
         public void Fibonacci()
         {
-            _kernel.Routes.RegisterRegex(Guid.NewGuid(), MyRegex, 1, ServeFibonacci);
+            _kernel.Routes.RegisterResourceHandlerRegex(Guid.NewGuid(), MyRegex, 1, ServeFibonacci);
             Assert.AreEqual(55, Fibonacci(10));
         }
 
@@ -90,7 +90,7 @@ namespace KernelTests.Basic_Functionality
             var provider = new ExternalWebrequestProvider();
             provider.Register(_kernel);
 
-            _kernel.Routes.RegisterMap(Guid.NewGuid(), "net://google", "http://www.google.de");
+            _kernel.Routes.RegisterResourceMapping(Guid.NewGuid(), "net://google", "http://www.google.de");
 
             var resource = _kernel.Get("net://google");
             Assert.IsTrue(resource.Body.Contains("<html"));

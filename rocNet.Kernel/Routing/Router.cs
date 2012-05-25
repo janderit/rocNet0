@@ -6,24 +6,24 @@ using System.Text.RegularExpressions;
 
 namespace LibKernel
 {
-    class Router : IRegisterRoutes
+    class Router : ResourceRegistry
     {
 
         private List<RouteEntry> _routes = new List<RouteEntry>();
 
-        public void RegisterImmediate(Guid routeGroupId, string nri, int energy, Func<ResourceRequest, ResourceRepresentation> handler)
+        public void RegisterResourceHandler(Guid routeGroupId, string nri, int energy, Func<ResourceRequest, ResourceRepresentation> handler)
         {
             _routes.Add(new ImmediateRouteEntry(routeGroupId, nri, energy, handler));
         }
 
-        public void RegisterRegex(Guid routeGroupId, string nriRegEx, int energy, Func<ResourceRequest, ResourceRepresentation> handler)
+        public void RegisterResourceHandlerRegex(Guid routeGroupId, string nriRegEx, int energy, Func<ResourceRequest, ResourceRepresentation> handler)
         {
             _routes.Add(new RegexRouteEntry(routeGroupId, nriRegEx, energy, handler));
         }
 
-        public void RegisterMap(Guid routeGroupId, string nriregex, string replacement)
+        public void RegisterResourceMapping(Guid routeGroupId, string nriregex, string replacement)
         {
-            RegisterRegex(routeGroupId, nriregex, 1, new MappedRoute(nriregex, replacement, this, true).Map);
+            RegisterResourceHandlerRegex(routeGroupId, nriregex, 1, new MappedRoute(nriregex, replacement, this, true).Map);
         }
 
         public void DeleteRoute(Guid routeGroupId)

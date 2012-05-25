@@ -42,7 +42,7 @@ namespace KernelTests.ZeroMq_Transport
         [Test]
         public void Fibonacci()
         {
-            _kernel.Routes.RegisterRegex(Guid.NewGuid(), MyRegex, 1, ServeFibonacci);
+            _kernel.Routes.RegisterResourceHandlerRegex(Guid.NewGuid(), MyRegex, 1, ServeFibonacci);
 
             var conn = new ZeroMqResourceProviderConnector("tcp://localhost:15674");
 

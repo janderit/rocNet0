@@ -44,7 +44,7 @@ namespace LibKernel
             throw new NotImplementedException();
         }
 
-        public IRegisterRoutes Routes { get { return _router; } }
+        public ResourceRegistry Routes { get { return _router; } }
 
 
         public void Reset()

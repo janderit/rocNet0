@@ -28,7 +28,7 @@ namespace KernelTests.Basic_Functionality
         [Test]
         public void Smoke()
         {
-            _kernel.Routes.RegisterImmediate(Guid.NewGuid(), "net://test", 1, a => { throw new NotImplementedException(); });
+            _kernel.Routes.RegisterResourceHandler(Guid.NewGuid(), "net://test", 1, a => { throw new NotImplementedException(); });
             Assert.True(true);
         }
 
@@ -42,19 +42,19 @@ namespace KernelTests.Basic_Functionality
         [Test]
         public void Immediate()
         {
-            _kernel.Routes.RegisterImmediate(Guid.NewGuid(), "net://test1", 1, a => new ResourceRepresentation
+            _kernel.Routes.RegisterResourceHandler(Guid.NewGuid(), "net://test1", 1, a => new ResourceRepresentation
                                                                                        {
                                                                                            Body="TEST1",
                                                                                            Cacheable=false
                                                                                        });
 
-            _kernel.Routes.RegisterImmediate(Guid.NewGuid(), "net://test2", 1, a => new ResourceRepresentation
+            _kernel.Routes.RegisterResourceHandler(Guid.NewGuid(), "net://test2", 1, a => new ResourceRepresentation
             {
                 Body = "TEST2",
                 Cacheable = false
             });
 
-            _kernel.Routes.RegisterImmediate(Guid.NewGuid(), "net://test3", 1, a => new ResourceRepresentation
+            _kernel.Routes.RegisterResourceHandler(Guid.NewGuid(), "net://test3", 1, a => new ResourceRepresentation
             {
                 Body = "TEST3",
                 Cacheable = false
@@ -66,20 +66,20 @@ namespace KernelTests.Basic_Functionality
         [Test, ExpectedException(typeof(FileNotFoundException))]
         public void Route_Removal()
         {
-            _kernel.Routes.RegisterImmediate(Guid.NewGuid(), "net://test1", 1, a => new ResourceRepresentation
+            _kernel.Routes.RegisterResourceHandler(Guid.NewGuid(), "net://test1", 1, a => new ResourceRepresentation
             {
                 Body = "TEST1",
                 Cacheable = false
             });
 
             var id = Guid.NewGuid();
-            _kernel.Routes.RegisterImmediate(id, "net://test2", 1, a => new ResourceRepresentation
+            _kernel.Routes.RegisterResourceHandler(id, "net://test2", 1, a => new ResourceRepresentation
             {
                 Body = "TEST2",
                 Cacheable = false
             });
 
-            _kernel.Routes.RegisterImmediate(Guid.NewGuid(), "net://test3", 1, a => new ResourceRepresentation
+            _kernel.Routes.RegisterResourceHandler(Guid.NewGuid(), "net://test3", 1, a => new ResourceRepresentation
             {
                 Body = "TEST3",
                 Cacheable = false
@@ -94,7 +94,7 @@ namespace KernelTests.Basic_Functionality
         [Test]
         public void Simple_Regex()
         {
-            _kernel.Routes.RegisterRegex(Guid.NewGuid(), "^net://test.$", 1, a => new ResourceRepresentation
+            _kernel.Routes.RegisterResourceHandlerRegex(Guid.NewGuid(), "^net://test.$", 1, a => new ResourceRepresentation
             {
                 Body = a.NetResourceLocator.Substring(6).ToUpper(),
                 Cacheable = false

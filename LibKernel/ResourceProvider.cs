@@ -12,7 +12,7 @@ namespace LibKernel
 
     public interface KernelRegistration
     {
-        IRegisterRoutes Routes { get; }
+        ResourceRegistry Routes { get; }
     }
 
 }
