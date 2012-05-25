@@ -9,9 +9,9 @@ using ZMQ;
 
 namespace LibKernel_zmq
 {
-    public class ZeroMqKernelFacade
+    public class ZeroMqResourceProviderFacade
     {
-        private readonly Kernel _kernel;
+        private readonly ResourceProvider _kernel;
         private readonly string _serverUri;
         private Context _context;
         private Socket _socket;
@@ -19,7 +19,7 @@ namespace LibKernel_zmq
         private Thread _worker;
         private Barrier _barrier;
 
-        public ZeroMqKernelFacade(Kernel kernel, string serverUri)
+        public ZeroMqResourceProviderFacade(ResourceProvider kernel, string serverUri)
         {
             if (kernel == null) throw new ArgumentNullException("kernel");
             if (serverUri == null) throw new ArgumentNullException("serverUri");
@@ -40,15 +40,24 @@ namespace LibKernel_zmq
         
         public void Stop()
         {
+            TerminateWorker();
+
             if (_socket == null) return;
             _socket.PollInHandler -= Handler;
-            _worker.Abort();
-            _worker.Join();
             _worker = null;
             _socket.Dispose();
             _context.Dispose();
             _socket = null;
             _context = null;
+        }
+
+        private void TerminateWorker()
+        {
+            _barrier = new Barrier(2);
+            terminate = true;
+            _barrier.SignalAndWait();
+            _barrier.Dispose();
+            _barrier = null;
         }
 
         private void Handler(Socket socket, IOMultiPlex revents)
@@ -57,6 +66,8 @@ namespace LibKernel_zmq
             var response = _kernel.Get(request);
             socket.SendDatagram(_formatter.Serialize(response));
         }
+
+        private volatile bool terminate = false;
 
         private void Worker()
         {
@@ -68,10 +79,12 @@ namespace LibKernel_zmq
             Thread.CurrentThread.IsBackground = true;
             _barrier.SignalAndWait();
 
-            while (true)
+            while (!terminate)
             {
                 Context.Poller(new List<Socket> { _socket }.ToArray(), 250000);
             }
+
+            _barrier.SignalAndWait();
         }
 
     }

@@ -49,8 +49,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SendDatagram.cs" />
     <Compile Include="ZeroMqConnector.cs" />
-    <Compile Include="ZeroMqKernelConnector.cs" />
-    <Compile Include="ZeroMqKernelFacade.cs" />
+    <Compile Include="ZeroMqResourceProviderConnector.cs" />
+    <Compile Include="ZeroMqResourceProviderFacade.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="libzmq.dll">

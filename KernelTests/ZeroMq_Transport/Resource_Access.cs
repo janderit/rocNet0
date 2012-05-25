@@ -15,13 +15,13 @@ namespace KernelTests.ZeroMq_Transport
     {
 
         private InProcessKernel _kernel;
-        private ZeroMqKernelFacade _facade;
+        private ZeroMqResourceProviderFacade _facade;
 
         [SetUp]
         public void StartKernel()
         {
             _kernel = new InProcessKernel();
-            _facade = new ZeroMqKernelFacade(_kernel, "tcp://127.0.0.1:15674");
+            _facade = new ZeroMqResourceProviderFacade(_kernel, "tcp://127.0.0.1:15674");
             _facade.Start();
         }
 
@@ -44,8 +44,7 @@ namespace KernelTests.ZeroMq_Transport
         {
             _kernel.Routes.RegisterRegex(Guid.NewGuid(), MyRegex, 1, ServeFibonacci);
 
-            var conn = new ZeroMqKernelConnector();
-            conn.Configure("tcp://localhost:15674");
+            var conn = new ZeroMqResourceProviderConnector("tcp://localhost:15674");
 
             var resp = conn.Get(new ResourceRequest {NetResourceLocator = "net://fib/10"});
 

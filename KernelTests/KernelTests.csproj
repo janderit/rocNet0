@@ -48,6 +48,7 @@
     <Compile Include="Basic_Functionality\Static_Serving.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ZeroMq_Transport\Resource_Access.cs" />
+    <Compile Include="ZeroMq_Transport\Resource_Provision.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

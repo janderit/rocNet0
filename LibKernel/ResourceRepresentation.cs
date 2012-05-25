@@ -9,6 +9,10 @@ namespace LibKernel
     {
         public ResourceRepresentation()
         {
+            Cacheable = false;
+            Expires = DateTime.Now;
+            Modified = DateTime.Now;
+
             Relations = new List<string>();
             Via = new List<string>();
             RevokationTokens = new List<Guid>();

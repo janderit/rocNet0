@@ -6,7 +6,7 @@ using System.Text;
 
 namespace LibKernel
 {
-    public class InProcessKernel : Kernel, KernelRegistration
+    public class InProcessKernel : ResourceProvider, KernelRegistration
     {
 
         private readonly Router _router = new Router();

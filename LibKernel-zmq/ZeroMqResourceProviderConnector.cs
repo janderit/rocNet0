@@ -8,13 +8,13 @@ using ZMQ;
 
 namespace LibKernel_zmq
 {
-    public class ZeroMqKernelConnector : Kernel
+    public class ZeroMqResourceProviderConnector : ResourceProvider
     {
         private string _zmqUrl;
         private ZeroMqDatagramFormatter _formatter;
         private ZeroMqConnector _conn;
 
-        public void Configure(string zmqUrl)
+        public ZeroMqResourceProviderConnector(string zmqUrl)
         {
             if (zmqUrl == null) throw new ArgumentNullException("zmqUrl");
             _zmqUrl = zmqUrl;

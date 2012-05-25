@@ -118,7 +118,7 @@ namespace LibKernel.MediaFormats
             resource.Size = Int32.Parse(headers.Single(_ => _.Header == ResponseHeaders.Size).Value);
             resource.MediaType = headers.Single(_ => _.Header == ResponseHeaders.MediaType).Value;
             resource.Modified = DateTime.Parse(headers.Single(_ => _.Header == ResponseHeaders.Modified).Value);
-            if (!headers.Any(_ => _.Header == ResponseHeaders.Expires))
+            if (headers.Any(_ => _.Header == ResponseHeaders.Expires))
             {
                 var value = headers.Single(_ => _.Header == ResponseHeaders.Expires).Value;
                 if (value=="NEVER") resource.Expires = DateTime.MaxValue; 
