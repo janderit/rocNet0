@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using LibKernel;
+using LibKernel.Exceptions;
 using NUnit.Framework;
 
 namespace KernelTests.Basic_Functionality
@@ -32,7 +33,7 @@ namespace KernelTests.Basic_Functionality
             Assert.True(true);
         }
 
-        [Test,ExpectedException(typeof(FileNotFoundException))]
+        [Test,ExpectedException(typeof(ResourceNotFoundException))]
         public void FileNotFound()
         {
             _kernel.Get("net://nonesense.HJGASD");
@@ -63,7 +64,7 @@ namespace KernelTests.Basic_Functionality
             Assert.AreEqual("TEST2", _kernel.Get("net://test2").Body);
         }
 
-        [Test, ExpectedException(typeof(FileNotFoundException))]
+        [Test, ExpectedException(typeof(ResourceNotFoundException))]
         public void Route_Removal()
         {
             _kernel.Routes.RegisterResourceHandler(Guid.NewGuid(), "net://test1", 1, a => new ResourceRepresentation

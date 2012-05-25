@@ -43,7 +43,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Caching\InMemoryCache.cs" />
     <Compile Include="Exceptions\MediaTypeException.cs" />
     <Compile Include="Exceptions\RouteUnavailableException.cs" />
     <Compile Include="Exceptions\ResourceUnavailableException.cs" />

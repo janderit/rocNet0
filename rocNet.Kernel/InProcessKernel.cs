@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using LibKernel.Exceptions;
 
 namespace LibKernel
 {
@@ -19,10 +20,11 @@ namespace LibKernel
         public ResourceRepresentation Get(string nrl)
         {
             var response = Get(new ResourceRequest {NetResourceLocator = nrl, AcceptableMediaTypes = new[] {@"*\+*"}});
-            if (response.Status == ResponseCode.NotFound) throw new FileNotFoundException(response.Information);
-            if (response.Status == ResponseCode.InternalError) throw new InvalidOperationException(response.Information);
-            if (response.Status != ResponseCode.Ok) throw new InvalidOperationException(response.Status.ToString()+" "+response.Information);
-            return response.Resource;
+            if (response.Status==ResponseCode.Ok) return response.Resource;
+
+            if (response.Status == ResponseCode.NotFound) throw ResourceNotFoundException.Create(response.Information, "");
+            if (response.Status == ResponseCode.InternalError) throw ResourceUnavailableException.Create("Internal error", response.Information);
+            throw ResourceUnavailableException.Create("Unknown status code (" + response.Status + ")", response.Information);
         }
 
         public Response Get(ResourceRequest request)
