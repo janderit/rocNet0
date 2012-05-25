@@ -9,7 +9,12 @@ namespace LibKernel
     public class InProcessKernel : ResourceProvider, KernelRegistration
     {
 
-        private readonly Router _router = new Router();
+        private readonly Router _router;
+
+        public InProcessKernel()
+        {
+            _router = new Router(this);
+        }
 
         public ResourceRepresentation Get(string nrl)
         {

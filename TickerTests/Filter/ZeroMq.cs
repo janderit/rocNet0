@@ -45,7 +45,7 @@ namespace TickerTests.Filter
             publisher.Publish(subject1, trigger1, "data1");
             publisher.Publish(subject2, trigger2, "data2");
 
-            Thread.Sleep(100);
+            Thread.Sleep(200);
 
             Assert.AreEqual(2, ticks.Count);
         }

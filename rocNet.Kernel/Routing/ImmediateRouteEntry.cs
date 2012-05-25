@@ -11,7 +11,7 @@ namespace LibKernel
         public readonly string Route;
 
         public Guid GroupId { get; private set; }
-        public int Energy { get; private set; }
+        public long Energy { get; private set; }
         public Func<ResourceRequest, ResourceRepresentation> Handler { get; private set; }
 
         public ImmediateRouteEntry(Guid groupId, string nri, int energy, Func<ResourceRequest, ResourceRepresentation> handler)

@@ -53,7 +53,7 @@ namespace TickerTests.Base
             var listener = Ticker.Listener.ZeroMq("tcp://localhost:32992", "tcp://localhost:32993").Listener(ticks.Add);
 
             publisher.Publish(subject1, trigger1, "data");
-            Thread.Sleep(200);
+            Thread.Sleep(250);
 
             Assert.AreEqual(1, ticks.Count);
             var tick = ticks.Single();

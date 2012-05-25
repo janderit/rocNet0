@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.4.5.5\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -41,8 +44,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Caching\InMemoryCache.cs" />
+    <Compile Include="Exceptions\MediaTypeException.cs" />
+    <Compile Include="Exceptions\RouteUnavailableException.cs" />
+    <Compile Include="Exceptions\ResourceUnavailableException.cs" />
+    <Compile Include="Exceptions\KernelException.cs" />
+    <Compile Include="Exceptions\ResourceNotFoundException.cs" />
     <Compile Include="Provider\IProvideResources.cs" />
     <Compile Include="Provider\RouteInfo.cs" />
+    <Compile Include="ResponseGuardExtension.cs" />
     <Compile Include="ResponseHeaders.cs" />
     <Compile Include="ResourceRegistry.cs" />
     <Compile Include="ResourceProvider.cs" />
@@ -54,10 +63,15 @@
     <Compile Include="ResourceRequestHeaders.cs" />
     <Compile Include="Response.cs" />
     <Compile Include="ResponseCode.cs" />
+    <Compile Include="Routing\RoutesInformation.cs" />
+    <Compile Include="Routing\RoutesRequest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="MediaTypes\" />
     <Folder Include="Transports\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
