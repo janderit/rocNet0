@@ -7,12 +7,12 @@ using LibKernel;
 
 namespace rocNet.Kernel.Routing
 {
-    internal class ForwardRouteEntry : RouteEntry
+    internal class ForwardKernelRoute : KernelRoute
     {
         private readonly ResourceProvider _provider;
         private readonly Regex _regex;
 
-        public ForwardRouteEntry(Guid routeGroupId, string nriregex, long energy, ResourceProvider provider)
+        public ForwardKernelRoute(Guid routeGroupId, string nriregex, long energy, ResourceProvider provider)
         {
             _regex = new Regex(nriregex);
             _provider = provider;
@@ -28,14 +28,18 @@ namespace rocNet.Kernel.Routing
             return _regex.IsMatch(nri);
         }
 
-        public Func<ResourceRequest, ResourceRepresentation> Handler
+        public Func<Request, ResourceRepresentation> Handler
         {
             get { return Handle; }
         }
 
-        private ResourceRepresentation Handle(ResourceRequest arg)
+        private ResourceRepresentation Handle(Request arg)
         {
-            return _provider.Get(arg).Guard();
+            var t0 = Environment.TickCount;
+            var x = _provider.Get(arg).Guard();
+            var t1 = Environment.TickCount;
+            if (Energy < t1 - t0) Energy = t1 - t0;
+            return x;
         }
     }
 }

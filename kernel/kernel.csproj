@@ -2,18 +2,21 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{FBDF24F4-D716-4C3F-8FCC-E4D6D6F02A65}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{C37FFEC6-FBCD-4201-8C17-0944FA161507}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>LibKernel</RootNamespace>
-    <AssemblyName>LibKernel</AssemblyName>
+    <RootNamespace>kernel</RootNamespace>
+    <AssemblyName>kernel</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x64</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,7 +25,8 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -31,9 +35,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.4.5.5\lib\net40\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -43,35 +44,33 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Exceptions\MediaTypeException.cs" />
-    <Compile Include="Exceptions\RouteUnavailableException.cs" />
-    <Compile Include="Exceptions\ResourceUnavailableException.cs" />
-    <Compile Include="Exceptions\KernelException.cs" />
-    <Compile Include="Exceptions\ResourceNotFoundException.cs" />
-    <Compile Include="PostProcessHook.cs" />
-    <Compile Include="Provider\IProvideResources.cs" />
-    <Compile Include="Provider\RouteInfo.cs" />
-    <Compile Include="ResponseGuardExtension.cs" />
-    <Compile Include="ResponseHeaders.cs" />
-    <Compile Include="ResourceRegistry.cs" />
-    <Compile Include="ResourceProvider.cs" />
-    <Compile Include="MediaFormats\ZeroMqDatagramFormatter.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Provider\StaticFileProvider.cs" />
-    <Compile Include="ResourceRepresentation.cs" />
-    <Compile Include="Request.cs" />
-    <Compile Include="ResourceRequestHeaders.cs" />
-    <Compile Include="Response.cs" />
-    <Compile Include="ResponseCode.cs" />
-    <Compile Include="Routing\KernelRoute.cs" />
-    <Compile Include="Routing\RoutesInformation.cs" />
-    <Compile Include="Routing\RoutesRequest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="MediaTypes\" />
+    <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <ProjectReference Include="..\LibKernel-http\LibKernel-http.csproj">
+      <Project>{3DF8EDD2-AB53-432E-84C1-ED6CABE90D25}</Project>
+      <Name>LibKernel-http</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LibKernel-memcache\LibKernel-memcache.csproj">
+      <Project>{7C5DEF0D-6F96-4291-BB69-F2E9A0DAF85B}</Project>
+      <Name>LibKernel-memcache</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LibKernel-zmq\LibKernel-zmq.csproj">
+      <Project>{1DEB5A87-9900-406A-8452-8505C8CE7FFE}</Project>
+      <Name>LibKernel-zmq</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LibKernel\LibKernel.csproj">
+      <Project>{FBDF24F4-D716-4C3F-8FCC-E4D6D6F02A65}</Project>
+      <Name>LibKernel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\rocNet.Kernel\rocNet.Kernel.csproj">
+      <Project>{9A57E26D-369C-4EF7-8B1E-7F2D5F86D8A8}</Project>
+      <Name>rocNet.Kernel</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

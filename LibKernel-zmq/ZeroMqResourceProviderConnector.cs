@@ -23,22 +23,15 @@ namespace LibKernel_zmq
         }
 
 
-        public Response Get(ResourceRequest request)
-        {
+        public Response Get(Request request)
+        {            
             return _formatter.DeserializeResponse(_conn.Transact(_formatter.Serialize(request)));
         }
 
-        public void Get(ResourceRequest request, Action<Response> response)
+        public IEnumerable<string> GetRaw(Request request)
         {
-            throw new NotImplementedException();
+            return (_conn.Transact(_formatter.Serialize(request))).ToList();
         }
-
-        public void Get(ResourceRequest request, Action<ResourceRepresentation> resource, Action<Response> onFailure)
-        {
-            throw new NotImplementedException();
-        }
-
-
 
     }
 }

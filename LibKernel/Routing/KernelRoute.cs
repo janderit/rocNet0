@@ -2,11 +2,11 @@
 
 namespace LibKernel
 {
-    public interface RouteEntry
+    public interface KernelRoute
     {
         Guid GroupId { get; }
         long Energy { get; }
         bool Match(string nri);
-        Func<ResourceRequest, ResourceRepresentation> Handler { get; }
+        Func<Request, ResourceRepresentation> Handler { get; }
     }
 }

@@ -9,7 +9,7 @@ namespace LibKernel.MediaFormats
 {
     public class ZeroMqDatagramFormatter
     {
-        public ResourceRequest DeserializeRequest(IEnumerable<string> datagram)
+        public Request DeserializeRequest(IEnumerable<string> datagram)
         {
             var headers = new List<HeaderLine>();
             var request = "";
@@ -24,10 +24,10 @@ namespace LibKernel.MediaFormats
                 }
             }
 
-            return new ResourceRequest {AcceptableMediaTypes = headers.Where(_=>_.Header==ResourceRequestHeaders.AcceptMediaType).Select(_=>_.Value).ToList(), NetResourceLocator=request};
+            return new Request {AcceptableMediaTypes = headers.Where(_=>_.Header==ResourceRequestHeaders.AcceptMediaType).Select(_=>_.Value).ToList(), NetResourceLocator=request};
         }
 
-        public IEnumerable<string> Serialize(ResourceRequest request)
+        public IEnumerable<string> Serialize(Request request)
         {
             foreach (var acceptableMediaType in request.AcceptableMediaTypes??new List<string>())
             {
@@ -53,10 +53,10 @@ namespace LibKernel.MediaFormats
                 }
                 yield return Header(ResponseHeaders.Energy, response.Resource.Energy.ToString());
                 yield return Header(ResponseHeaders.Size, response.Resource.Size.ToString());
-                foreach (var h in response.Resource.Via) yield return Header(ResponseHeaders.Via, h);
-                foreach (var h in response.Resource.Correlations) yield return Header(ResponseHeaders.Correlation, h.ToString());
-                foreach (var h in response.Resource.RevokationTokens) yield return Header(ResponseHeaders.Revokation, h.ToString());
-                foreach (var h in response.Resource.Relations) yield return Header(ResponseHeaders.Relation, h);
+                foreach (var h in response.Resource.Via??new List<string>()) yield return Header(ResponseHeaders.Via, h);
+                foreach (var h in response.Resource.Correlations ?? new List<Guid>()) yield return Header(ResponseHeaders.Correlation, h.ToString());
+                foreach (var h in response.Resource.RevokationTokens ?? new List<Guid>()) yield return Header(ResponseHeaders.Revokation, h.ToString());
+                foreach (var h in response.Resource.Relations ?? new List<string>()) yield return Header(ResponseHeaders.Relation, h);
 
                 yield return "";
                 yield return response.Resource.Body;

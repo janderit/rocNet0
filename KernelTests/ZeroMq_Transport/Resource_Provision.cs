@@ -53,13 +53,13 @@ namespace KernelTests.ZeroMq_Transport
         [Test]
         public void Loopback()
         {
-            Assert.AreEqual("Hello World", _service.Get(new ResourceRequest { NetResourceLocator = "net://test" }).Resource.Body);
+            Assert.AreEqual("Hello World", _service.Get(new Request { NetResourceLocator = "net://test" }).Resource.Body);
         }
 
         [Test]
         public void Direct()
         {
-            Assert.AreEqual("Hello World", new ZeroMqResourceProviderConnector("tcp://localhost:15700").Get(new ResourceRequest { NetResourceLocator = "net://test" }).Resource.Body);
+            Assert.AreEqual("Hello World", new ZeroMqResourceProviderConnector("tcp://localhost:15700").Get(new Request { NetResourceLocator = "net://test" }).Resource.Body);
         }
 
         [Test]

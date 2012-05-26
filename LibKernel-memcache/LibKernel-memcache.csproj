@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{FBDF24F4-D716-4C3F-8FCC-E4D6D6F02A65}</ProjectGuid>
+    <ProjectGuid>{7C5DEF0D-6F96-4291-BB69-F2E9A0DAF85B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>LibKernel</RootNamespace>
-    <AssemblyName>LibKernel</AssemblyName>
+    <RootNamespace>LibKernel_memcache</RootNamespace>
+    <AssemblyName>LibKernel-memcache</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -43,32 +43,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Exceptions\MediaTypeException.cs" />
-    <Compile Include="Exceptions\RouteUnavailableException.cs" />
-    <Compile Include="Exceptions\ResourceUnavailableException.cs" />
-    <Compile Include="Exceptions\KernelException.cs" />
-    <Compile Include="Exceptions\ResourceNotFoundException.cs" />
-    <Compile Include="PostProcessHook.cs" />
-    <Compile Include="Provider\IProvideResources.cs" />
-    <Compile Include="Provider\RouteInfo.cs" />
-    <Compile Include="ResponseGuardExtension.cs" />
-    <Compile Include="ResponseHeaders.cs" />
-    <Compile Include="ResourceRegistry.cs" />
-    <Compile Include="ResourceProvider.cs" />
-    <Compile Include="MediaFormats\ZeroMqDatagramFormatter.cs" />
+    <Compile Include="InMemoryCache.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Provider\StaticFileProvider.cs" />
-    <Compile Include="ResourceRepresentation.cs" />
-    <Compile Include="Request.cs" />
-    <Compile Include="ResourceRequestHeaders.cs" />
-    <Compile Include="Response.cs" />
-    <Compile Include="ResponseCode.cs" />
-    <Compile Include="Routing\KernelRoute.cs" />
-    <Compile Include="Routing\RoutesInformation.cs" />
-    <Compile Include="Routing\RoutesRequest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="MediaTypes\" />
+    <ProjectReference Include="..\LibKernel\LibKernel.csproj">
+      <Project>{FBDF24F4-D716-4C3F-8FCC-E4D6D6F02A65}</Project>
+      <Name>LibKernel</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

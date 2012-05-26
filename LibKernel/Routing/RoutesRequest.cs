@@ -7,14 +7,14 @@ namespace LibKernel.Routing
 {
     public static class RoutesRequest
     {
-        public static ResourceRequest Get(Guid provider)
+        public static Request Get(Guid provider)
         {
-            return new ResourceRequest {NetResourceLocator = "net://"+provider, AcceptableMediaTypes = new[] {RoutesInformation.Mediatype}};
+            return new Request {NetResourceLocator = "net://"+provider, AcceptableMediaTypes = new[] {RoutesInformation.Mediatype}};
         }
 
-        public static ResourceRequest GetGlobal()
+        public static Request GetGlobal()
         {
-            return new ResourceRequest {NetResourceLocator = "net://@", AcceptableMediaTypes = new[] {RoutesInformation.Mediatype}};
+            return new Request {NetResourceLocator = "net://@", AcceptableMediaTypes = new[] {RoutesInformation.Mediatype}};
         }
     }
 }

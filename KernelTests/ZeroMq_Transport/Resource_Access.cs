@@ -46,7 +46,7 @@ namespace KernelTests.ZeroMq_Transport
 
             var conn = new ZeroMqResourceProviderConnector("tcp://localhost:15674");
 
-            var resp = conn.Get(new ResourceRequest {NetResourceLocator = "net://fib/10"});
+            var resp = conn.Get(new Request {NetResourceLocator = "net://fib/10"});
 
             Assert.AreEqual(55, Int32.Parse(resp.Resource.Body));
         }
@@ -55,14 +55,14 @@ namespace KernelTests.ZeroMq_Transport
         {
             return
                 Int64.Parse(
-                    _kernel.Get(new ResourceRequest
+                    _kernel.Get(new Request
                                     {
                                         NetResourceLocator = "net://fib/" + p,
                                         AcceptableMediaTypes = new[] {"text/longint"}
                                     }).Resource.Body);
         }
 
-        private ResourceRepresentation ServeFibonacci(ResourceRequest req)
+        private ResourceRepresentation ServeFibonacci(Request req)
         {
             var p = Int64.Parse(Regex.Replace(req.NetResourceLocator, MyRegex, "${i}"));
 

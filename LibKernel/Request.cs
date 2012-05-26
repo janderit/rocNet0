@@ -5,7 +5,7 @@ using System.Text;
 
 namespace LibKernel
 {
-    public struct ResourceRequest
+    public struct Request
     {
         public string NetResourceLocator;
         public IEnumerable<string> AcceptableMediaTypes;

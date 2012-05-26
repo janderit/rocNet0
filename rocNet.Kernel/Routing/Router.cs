@@ -11,7 +11,7 @@ namespace LibKernel
     class Router : ResourceRegistry
     {
 
-        private readonly List<RouteEntry> _routes = new List<RouteEntry>();
+        private readonly List<KernelRoute> _routes = new List<KernelRoute>();
         private readonly Dictionary<Guid, ResourceProvider> _provider = new Dictionary<Guid, ResourceProvider>();
         private readonly ResourceProvider _kernel;
 
@@ -21,14 +21,19 @@ namespace LibKernel
             _kernel = kernel;
         }
 
-        public void RegisterResourceHandler(Guid routeGroupId, string nri, int energy, Func<ResourceRequest, ResourceRepresentation> handler)
+        public void RegisterRoute(Guid routeGroupId, KernelRoute route)
         {
-            _routes.Add(new ImmediateRouteEntry(routeGroupId, nri, energy, handler));
+            _routes.Add(route);
         }
 
-        public void RegisterResourceHandlerRegex(Guid routeGroupId, string nriRegEx, int energy, Func<ResourceRequest, ResourceRepresentation> handler)
+        public void RegisterResourceHandler(Guid routeGroupId, string nri, int energy, Func<Request, ResourceRepresentation> handler)
         {
-            _routes.Add(new RegexRouteEntry(routeGroupId, nriRegEx, energy, handler));
+            _routes.Add(new ImmediateKernelRoute(routeGroupId, nri, energy, handler));
+        }
+
+        public void RegisterResourceHandlerRegex(Guid routeGroupId, string nriRegEx, int energy, Func<Request, ResourceRepresentation> handler)
+        {
+            _routes.Add(new RegexKernelRoute(routeGroupId, nriRegEx, energy, handler));
         }
 
         public void RegisterResourceMapping(Guid routeGroupId, string nriregex, string replacement)
@@ -69,8 +74,8 @@ namespace LibKernel
 
         private IEnumerable<Routing.RouteEntry> PublicRoutes()
         {
-            var ri = _routes.OfType<ImmediateRouteEntry>().Select(_=>new Routing.RouteEntry{Identifier=_.Nri, Energy = _.Energy});
-            ri = ri.Union(_routes.OfType<RegexRouteEntry>().Select(_ => new Routing.RouteEntry { Regex = _.NriRegex, Energy = _.Energy }));
+            var ri = _routes.OfType<ImmediateKernelRoute>().Select(_=>new Routing.RouteEntry{Identifier=_.Nri, Energy = _.Energy});
+            ri = ri.Union(_routes.OfType<RegexKernelRoute>().Select(_ => new Routing.RouteEntry { Regex = _.NriRegex, Energy = _.Energy }));
             return ri.ToList();
         }
 
@@ -81,7 +86,7 @@ namespace LibKernel
 
         public void RegisterResourceForwarder(Guid routeGroupId, string nriregex, ResourceProvider provider, long energy)
         {
-            _routes.Add(new ForwardRouteEntry(routeGroupId, nriregex, energy, provider));
+            _routes.Add(new ForwardKernelRoute(routeGroupId, nriregex, energy, provider));
         }
 
         public void DeleteRoute(Guid routeGroupId)
@@ -89,9 +94,14 @@ namespace LibKernel
             _routes.Where(_ => _.GroupId == routeGroupId).ToList().ForEach(_ => _routes.Remove(_));
         }
 
-        public Func<ResourceRequest, ResourceRepresentation> Lookup(string nri)
+        public KernelRoute Lookup(string nri)
         {
-            return _routes.Where(_ => _.Match(nri)).OrderBy(_ => _.Energy).Select(_=>_.Handler).FirstOrDefault();
+            var r = _routes.Where(_ => _.Match(nri)).OrderBy(_ => _.Energy).ToList();
+
+            if (r.Count()==0) Console.WriteLine(nri+" ---> <none>");
+            else Console.WriteLine(nri+" --"+r.Count()+"-> "+r.First().GetType().Name+" ["+r.First().Energy+"]");
+
+            return r.FirstOrDefault();
         }
 
 
@@ -118,11 +128,11 @@ namespace LibKernel
             _rewritenrl = rewritenrl;
         }
 
-        public ResourceRepresentation Map(ResourceRequest req)
+        public ResourceRepresentation Map(Request req)
         {
             var mapped = Regex.Replace(req.NetResourceLocator, _nriregex, _replacement);
             var handler = _router.Lookup(mapped);
-            return handler(_rewritenrl ? new ResourceRequest {NetResourceLocator = mapped, AcceptableMediaTypes = req.AcceptableMediaTypes} : req);
+            return handler.Handler(_rewritenrl ? new Request {NetResourceLocator = mapped, AcceptableMediaTypes = req.AcceptableMediaTypes} : req);
         }
     }
 }

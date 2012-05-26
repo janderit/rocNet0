@@ -7,12 +7,13 @@ namespace LibKernel
 {
     public interface ResourceProvider
     {
-        Response Get(ResourceRequest request);
+        Response Get(Request request);
     }
 
     public interface KernelRegistration
     {
         ResourceRegistry Routes { get; }
+        void AddHook(PostProcessHook hook);
     }
 
 }

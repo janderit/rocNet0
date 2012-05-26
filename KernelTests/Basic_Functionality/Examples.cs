@@ -40,14 +40,14 @@ namespace KernelTests.Basic_Functionality
         {
             return
                 Int64.Parse(
-                    _kernel.Get(new ResourceRequest
+                    _kernel.Get(new Request
                                     {
                                         NetResourceLocator = "net://fib/" + p,
                                         AcceptableMediaTypes = new[] {"text/longint"}
                                     }).Resource.Body);
         }
 
-        private ResourceRepresentation ServeFibonacci(ResourceRequest req)
+        private ResourceRepresentation ServeFibonacci(Request req)
         {
             var p = Int64.Parse(Regex.Replace(req.NetResourceLocator, MyRegex, "${i}"));
 
