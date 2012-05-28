@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Reactive;
+using System.Reactive.Linq;
 using LibKernel;
 using LibKernel_http;
 using LibKernel_memcache;
@@ -22,9 +25,7 @@ namespace kernel
             Console.Write("0MQ port>");
             var port = Console.ReadLine();            
             var uri = "tcp://127.0.0.1:"+port;
-
-
-
+            
             _kernel = new InProcessKernel();
 
             _kernel.Routes.RegisterResourceHandler(Guid.NewGuid(), "net://test", 0, r => new ResourceRepresentation { NetResourceIdentifier = "net://hello", MediaType = "text", Body = "Hello World" });
@@ -36,12 +37,19 @@ namespace kernel
             web.Register(_kernel);
             _kernel.Routes.EnableRoutePublication();
 
-            InMemoryCache.AttachTo(_kernel);
+            var cache = InMemoryCache.AttachTo(_kernel);
 
+            cache.EnergySizeTradeoffFactor = 1;
+            cache.MinCachableEnergy = 0;
+            cache.MinimumExpirationTimesEnergyFactor = 0;
 
+            cache.MaxResourcesInCache = 20;
+            cache.RemovalChunkSize =5;
+            cache.MaxCacheDurationSeconds = 20;
 
             var p = new ZeroMqResourceProviderFacade(_kernel, uri);
             p.Start();
+
             Console.WriteLine("Kernel running on "+uri+" ...");
             Console.ReadLine();
             p.Stop();
@@ -56,7 +64,7 @@ namespace kernel
             return new ResourceRepresentation
                 {
                     Cacheable=true,
-                    Expires=DateTime.Now.AddMinutes(2),
+                    Expires=DateTime.Now.AddSeconds(30),
                     NetResourceIdentifier = "net://greeting/morning/" + name,
                     MediaType = "text",
                     Body = "Good morning to you, " + name + ", too!"

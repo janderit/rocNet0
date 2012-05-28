@@ -2,18 +2,20 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{7C5DEF0D-6F96-4291-BB69-F2E9A0DAF85B}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{75B2A81E-FB9B-4378-A6B5-F93DBCC24584}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>LibKernel_memcache</RootNamespace>
-    <AssemblyName>LibKernel-memcache</AssemblyName>
+    <RootNamespace>kernelstressfib</RootNamespace>
+    <AssemblyName>kernelstressfib</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x64</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,7 +24,8 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -31,8 +34,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.4.5.5\lib\net40\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="clrzmq, Version=2.2.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\clrzmq-x64.2.2.3\lib\clrzmq.dll</HintPath>
+    </Reference>
+    <Reference Include="clrzmq-ext">
+      <HintPath>..\packages\clrzmq-x64.2.2.3\lib\clrzmq-ext.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -43,20 +49,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="InMemoryCache.CacheOps.cs" />
-    <Compile Include="InMemoryCache.RemovalStrategy.cs" />
-    <Compile Include="InMemoryCache.Stat.cs" />
-    <Compile Include="InMemoryCache.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\LibKernel-zmq\LibKernel-zmq.csproj">
+      <Project>{1DEB5A87-9900-406A-8452-8505C8CE7FFE}</Project>
+      <Name>LibKernel-zmq</Name>
+    </ProjectReference>
     <ProjectReference Include="..\LibKernel\LibKernel.csproj">
       <Project>{FBDF24F4-D716-4C3F-8FCC-E4D6D6F02A65}</Project>
       <Name>LibKernel</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="InMemoryCache.CachingStrategy.cs" />
+    <None Include="libzmq.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

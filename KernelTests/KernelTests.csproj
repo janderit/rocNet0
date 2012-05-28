@@ -46,6 +46,11 @@
     <Compile Include="Basic_Functionality\Examples.cs" />
     <Compile Include="Basic_Functionality\Routing.cs" />
     <Compile Include="Basic_Functionality\Static_Serving.cs" />
+    <Compile Include="Cache\Accounting_Cached_Resources.cs" />
+    <Compile Include="Cache\Aliasing.cs" />
+    <Compile Include="Cache\Basic_Functionality.cs" />
+    <Compile Include="Cache\Cache_Limits.cs" />
+    <Compile Include="Cache\Invalidation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ZeroMq_Transport\Resource_Access.cs" />
     <Compile Include="ZeroMq_Transport\Resource_Provision.cs" />
@@ -58,6 +63,10 @@
     <ProjectReference Include="..\LibKernel-http\LibKernel-http.csproj">
       <Project>{3DF8EDD2-AB53-432E-84C1-ED6CABE90D25}</Project>
       <Name>LibKernel-http</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LibKernel-memcache\LibKernel-memcache.csproj">
+      <Project>{7C5DEF0D-6F96-4291-BB69-F2E9A0DAF85B}</Project>
+      <Name>LibKernel-memcache</Name>
     </ProjectReference>
     <ProjectReference Include="..\LibKernel-zmq\LibKernel-zmq.csproj">
       <Project>{1DEB5A87-9900-406A-8452-8505C8CE7FFE}</Project>

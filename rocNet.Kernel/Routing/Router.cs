@@ -98,8 +98,8 @@ namespace LibKernel
         {
             var r = _routes.Where(_ => _.Match(nri)).OrderBy(_ => _.Energy).ToList();
 
-            if (r.Count()==0) Console.WriteLine(nri+" ---> <none>");
-            else Console.WriteLine(nri+" --"+r.Count()+"-> "+r.First().GetType().Name+" ["+r.First().Energy+"]");
+            //if (r.Count()==0) Console.WriteLine(nri+" ---> <none>");
+            //else Console.WriteLine(nri+" --"+r.Count()+"-> "+r.First().GetType().Name+" ["+r.First().Energy+"]");
 
             return r.FirstOrDefault();
         }

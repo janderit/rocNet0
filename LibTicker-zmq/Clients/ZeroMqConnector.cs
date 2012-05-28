@@ -10,11 +10,16 @@ namespace LibTicker.Clients
     {
         private readonly string _uri;
         private readonly bool _singletonSocket;
-        private readonly Context _context;
+        private static readonly Context _context;
         private readonly Socket _control;
 
         private int CommandTimeoutMicroseconds { get; set; }
         private int QueryTimeoutMicroseconds { get; set; }
+
+        static ZeroMqConnector()
+        {
+            _context = new Context();
+        }
 
         public ZeroMqConnector(string uri, bool singletonSocket = false)
         {
@@ -23,7 +28,7 @@ namespace LibTicker.Clients
 
             _uri = uri;
             _singletonSocket = singletonSocket;
-            _context = new Context();
+            
             if (singletonSocket)
             {
                 _control = _context.Socket(SocketType.REQ);

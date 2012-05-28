@@ -69,6 +69,11 @@ namespace LibKernel.MediaFormats
         }
         public Response DeserializeResponse(IEnumerable<string> datagram)
         {
+            if (datagram == null)
+            {
+                return new Response {Status = ResponseCode.CommunicationsError, Information = "No data received"};
+            }
+
             var ident = datagram.First().Split(new char[] {' '}, 3);
 
             if (ident[1]!="rocNet") throw new InvalidDataException("Unknown datagram format: "+ident[1]);

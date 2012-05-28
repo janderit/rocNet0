@@ -6,10 +6,16 @@ using LibKernel;
 
 namespace LibKernel_memcache
 {
-    public class InMemoryCache : KernelRoute, PostProcessHook
+    public partial class InMemoryCache : KernelRoute, PostProcessHook
     {
 
-        public static void AttachTo(KernelRegistration kernel)
+        public InMemoryCache()
+        {
+            SetCachingStrategyDefaults();
+            SetRemovalStrategyDefaults();
+        }
+
+        public static InMemoryCache AttachTo(KernelRegistration kernel)
         {
             var cache = new InMemoryCache
                             {
@@ -19,11 +25,12 @@ namespace LibKernel_memcache
             kernel.AddHook(cache);
             kernel.Routes.RegisterRoute(cache.GroupId, cache);
             kernel.Routes.RegisterResourceHandler(cache.GroupId, "net://@cache", 0, r => cache.CacheInfo());
+            kernel.Routes.RegisterResourceHandler(cache.GroupId, "net://@cacheids", 0, r => cache.CacheIds());
+            return cache;
         }
 
         public Guid GroupId { get; set; }
 
-        private readonly Dictionary<string, ResourceRepresentation> _cache = new Dictionary<string, ResourceRepresentation>();
         private readonly Dictionary<string, string> _alias = new Dictionary<string, string>();
 
         public long Energy
@@ -31,48 +38,38 @@ namespace LibKernel_memcache
             get { return 1; }
         }
 
-        public int MaxResourcesInCache { get; set; }
-        public long MaxCacheSize { get; set; }
-        public long MaxCacheDurationSeconds { get; set; }
-        public long MinCachableEnergy { get; set; }
-        public long MaxCachableSize { get; set; }
 
+
+        private DateTime _lastgc = DateTime.MinValue;
+        public TimeSpan GarbageCollectionInterval = TimeSpan.FromSeconds(10);
         public bool Match(string nri)
         {
-            return _cache.ContainsKey(nri) || _alias.ContainsKey(nri);
+            if (DateTime.Now > _lastgc + GarbageCollectionInterval)
+            {
+                _lastgc = DateTime.Now;
+                TriggerGarbageCollection();
+            }
+
+            var result = _cache.ContainsKey(nri) || _alias.ContainsKey(nri);
+            _matchrequests++;
+            if (result) _hits++;
+            return result;
         }
 
         public Func<Request, ResourceRepresentation> Handler
         {
-            get { return r => _cache[Dealias(r.NetResourceLocator)]; }
-        }
-
-        private ResourceRepresentation CacheInfo()
-        {
-            return new ResourceRepresentation
-                       {
-                           Body=
-                           "rocNet kerlen memcache\r\n"
-                           +_cache.Count+" resources cached \r\n"
-                           +_alias.Count+" aliases registered\r\n"
-                           + "? cached bytes\r\n\r\n"
-                           + "? cache energy value\r\n\r\n"
-                           + "? revokation tokens\r\n\r\n"
-                           + "HitRate: -not evaluated- \r\n"
-                           + "EnergySaved: -not evaluated- \r\n"
-                           + "Revocations: -not evaluated- \r\n\r\n"
-                           + "MaxCacheItems: "+MaxResourcesInCache+" \r\n"
-                           + "MaxCacheSize: " + MaxCacheSize + " \r\n"
-                           + "MinCachableEnergy: " + MinCachableEnergy + " \r\n"
-                           + "MaxCachableSize: " + MaxCachableSize + " \r\n"
-                           + "MaxCacheDurationSeconds: " + MaxCacheDurationSeconds + " \r\n"
-                           
-                           ,
-                           Cacheable=false,
-                           Energy=1,
-                           MediaType="text/plain",
-                           NetResourceIdentifier = "net://@cache"                           
-                       };
+            get
+            {
+                return r =>
+                           {
+                               var nri = Dealias(r.NetResourceLocator);
+                               var result = _cache[nri];
+                               _deliveredenergy += result.Energy;
+                               _hitlist[nri]++;
+                               _lastlist[nri] = DateTime.Now;
+                               return result;
+                           };
+            }
         }
 
         private string Dealias(string netResourceLocator)
@@ -85,41 +82,80 @@ namespace LibKernel_memcache
             if (response.Status!=ResponseCode.Ok) return response;
 
             if (_cache.ContainsKey(response.Resource.NetResourceIdentifier))
-            {
-                if (request.NetResourceLocator != response.Resource.NetResourceIdentifier) if (!_alias.ContainsKey(request.NetResourceLocator)) _alias.Add(request.NetResourceLocator, response.Resource.NetResourceIdentifier);
+            { // assuming that the response originated in this cache
+                if (!IsCanonical(response, request)) AddAliasIfUnknown(response, request);
                 return response;
             }
 
-            if (response.Resource.Cacheable)
+            if (response.Resource.Cacheable && CheckCachingStrategy(response.Resource))
             {
-                var cacheitem = new ResourceRepresentation()
-                                    {
-                                        Body = response.Resource.Body,
-                                        Cacheable=true,
-                                        Correlations = (response.Resource.Correlations ?? new List<Guid>()).ToList(),
-                                        Energy=response.Resource.Energy,
-                                        Expires = response.Resource.Expires,
-                                        Headers = (response.Resource.Headers ?? new List<string>()).Union(new[] { "X-Cache: HIT" }).ToList(),
-                                        MediaType = response.Resource.MediaType,
-                                        Modified=response.Resource.Modified,
-                                        NetResourceIdentifier=response.Resource.NetResourceIdentifier,
-                                        Relations = (response.Resource.Relations ?? new List<string>()),
-                                        RevokationTokens = (response.Resource.RevokationTokens ?? new List<Guid>()).ToList(),
-                                        Size=response.Resource.Size,
-                                        Via = (response.Resource.Via ?? new List<string>()).Union(new[] { "rocNet-memcache" }).ToList()
-                                    };
+                CheckForRemovals();
+                AddToCache(response);
 
-                _cache.Add(response.Resource.NetResourceIdentifier, cacheitem);
-
-                if (request.NetResourceLocator != response.Resource.NetResourceIdentifier) if (!_alias.ContainsKey(request.NetResourceLocator)) _alias.Add(request.NetResourceLocator, response.Resource.NetResourceIdentifier);
-
-                response.Resource.Headers = (response.Resource.Headers??new List<string>()).Union(new[] { "X-Cache: MISS,CACHED" }).ToList();
+                if (!IsCanonical(response, request)) AddAliasIfUnknown(response, request);
+                ModifyHeaderAddCached(response);
             }
             else
             {
-                response.Resource.Headers = (response.Resource.Headers ?? new List<string>()).Union(new[] { "X-Cache: MISS,IGNORED" }).ToList();
+                ModifyHeaderAddCacheMiss(response);
             }
             return response;
         }
+
+        private static bool IsCanonical(Response response, Request request)
+        {
+            return request.NetResourceLocator == response.Resource.NetResourceIdentifier;
+        }
+
+        private static void ModifyHeaderAddCacheMiss(Response response)
+        {
+            response.Resource.Headers = (response.Resource.Headers ?? new List<string>()).Union(new[] { "X-Cache: MISS,IGNORED" }).ToList();
+        }
+
+        private static void ModifyHeaderAddCached(Response response)
+        {
+            response.Resource.Headers = (response.Resource.Headers??new List<string>()).Union(new[] { "X-Cache: MISS,CACHED" }).ToList();
+        }
+
+        private void AddAliasIfUnknown(Response response, Request request)
+        {
+            if (!_alias.ContainsKey(request.NetResourceLocator)) _alias.Add(request.NetResourceLocator, response.Resource.NetResourceIdentifier);
+        }
+
+        
+        public void Clear()
+        {
+            _alias.Clear();
+            DoClearCache();
+            _hitlist.Clear();
+            _lastlist.Clear();
+        }
+
+        
+
+        public void Revoke(Guid revocation)
+        {
+            var removal = _cache.Where(_ => _.Value.RevokationTokens.Contains(revocation)).Select(_=>_.Key).ToList();
+
+            foreach (var r in removal)
+            {
+                _revoked++;
+                if (_cache.ContainsKey(r)) RemoveFromCache(r);
+            }
+
+        }
+
+        private void RemoveAliases(string nri)
+        {
+            var aliasesToRemove = _alias.Where(_ => _.Value == nri).Select(_ => _.Key).ToList();
+            foreach (var nrl in aliasesToRemove) _alias.Remove(nrl);
+        }
+
+        public void TriggerGarbageCollection()
+        {
+            DoGarbageCollection();
+        }
+
+        
     }
 }
