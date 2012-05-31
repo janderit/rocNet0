@@ -3,13 +3,16 @@ gem 'rubyzip'
 require 'zip/zip'
 require 'zip/zipfilesystem'
 
-# cd WORKSPACE
-# %systemroot%\Microsoft.NET\Framework64\v4.0.30319\MSBuild
 
-
+PRODUCT_NAME = "rocNet Kernel"
+COMPANY_NAME = "Jander.IT"
+COPYRIGHT = "(c) 2012 Jander.IT"
 WORKSPACE = ENV["WORKSPACE"] || "."
 BUILD_NUMBER = ENV["BUILD_NUMBER"] || "0"
 TARGET = :Debug
+
+NUNIT_EXE="C:/Program Files (x86)/NUnit 2.6/bin/nunit-console"
+
 
 projects = (Dir.entries(WORKSPACE)-[".",".."]).select{|x|File.directory?(File.join(WORKSPACE,x))}.select{|x|File.exists?(File.join(WORKSPACE,x,"Properties","AssemblyInfo.cs"))}
 
@@ -18,10 +21,22 @@ task :default => [:kernel_all_build,:kerneltest]
 task :kernel_all_build => [:kernel_build,:kerneltests_build]
 
 desc "Build rocNet kernel"
-msbuild :kernel_build => :libkernel_build do |msb|
+msbuild :kernel_build => [:libkernel_build,:kernel_info] do |msb|
   msb.properties :configuration => TARGET
   msb.targets :Clean, :Build
   msb.solution = "rocnet.kernel/rocnet.kernel.csproj"
+end
+
+assemblyinfo :kernel_info => :loadtargetversion do |asm|
+  asm.output_file = "rocnet.kernel/Properties/AssemblyInfo.cs"  
+  asm.title = "Kernel component"
+  asm.description = ""
+  asm.product_name = PRODUCT_NAME
+  asm.company_name = COMPANY_NAME
+  asm.copyright = COPYRIGHT
+  asm.version = VERSIONSTRING
+  asm.file_version = VERSIONSTRING
+  asm.custom_attributes :ComVisible => false
 end
 
 desc "Build kernel tests"
@@ -32,36 +47,65 @@ msbuild :kerneltests_build => [:kernel_build,:libkernel_build,:libkernel_memcach
 end
 
 desc "Build libkernel"
-msbuild :libkernel_build do |msb|
+msbuild :libkernel_build =>[:libkernel_info] do |msb|
   msb.properties :configuration => TARGET
   msb.targets :Clean, :Build
   msb.solution = "LibKernel/LibKernel.csproj"
 end
 
+assemblyinfo :libkernel_info => :loadtargetversion do |asm|
+  asm.output_file = "LibKernel/Properties/AssemblyInfo.cs"  
+  asm.title = "Kernel client library"
+  asm.description = ""
+  asm.product_name = PRODUCT_NAME
+  asm.company_name = COMPANY_NAME
+  asm.copyright = COPYRIGHT
+  asm.version = VERSIONSTRING
+  asm.file_version = VERSIONSTRING
+  asm.custom_attributes :ComVisible => false
+end
+
 desc "Build libkernel-memcache"
-msbuild :libkernel_memcache_build do |msb|
+msbuild :libkernel_memcache_build =>[:libkernel_memcache_info] do |msb|
   msb.properties :configuration => TARGET
   msb.targets :Clean, :Build
   msb.solution = "LibKernel-memcache/LibKernel-memcache.csproj"
 end
 
+assemblyinfo :libkernel_memcache_info => :loadtargetversion do |asm|
+  asm.output_file = "LibKernel-memcache/Properties/AssemblyInfo.cs"  
+  asm.title = "Kernel in-memory cache"
+  asm.description = ""
+  asm.product_name = PRODUCT_NAME
+  asm.company_name = COMPANY_NAME
+  asm.copyright = COPYRIGHT
+  asm.version = VERSIONSTRING
+  asm.file_version = VERSIONSTRING
+  asm.custom_attributes :ComVisible => false
+end
+
 desc "Build libkernel-zmq"
-msbuild :libkernel_zmq_build do |msb|
+msbuild :libkernel_zmq_build => [:libkernel_zmq_info] do |msb|
   msb.properties :configuration => TARGET
   msb.targets :Clean, :Build
   msb.solution = "LibKernel-zmq/LibKernel-zmq.csproj"
 end
 
+assemblyinfo :libkernel_zmq_info => :loadtargetversion do |asm|
+  asm.output_file = "LibKernel-zmq/Properties/AssemblyInfo.cs"  
+  asm.title = "Kernel zeromq support (x64)"
+  asm.description = ""
+  asm.product_name = PRODUCT_NAME
+  asm.company_name = COMPANY_NAME
+  asm.copyright = COPYRIGHT
+  asm.version = VERSIONSTRING
+  asm.file_version = VERSIONSTRING
+  asm.custom_attributes :ComVisible => false
+end
 
 
-#assemblyinfo :assemblyinfo => :loadtargetversion do |asm|
-  #asm.version = VERSIONSTRING
-  #asm.file_version = VERSIONSTRING
-#
-  #asm.company_name = "Jander IT"
-  #asm.copyright = "Philip Jander (c) 2012"
-  #asm.output_file = "AssemblyInfo.cs"
-#end
+
+
 
 
 task :loadtargetversion do 	
@@ -74,13 +118,14 @@ end
 
 desc "Test rocNet Kernel" 
 nunit :kerneltest => :kerneltests_build do |nunit|
-	nunit.command = "C:/Program Files (x86)/NUnit 2.6/bin/nunit-console"
+	nunit.command = NUNIT_EXE
 	nunit.options '/framework v4.0.30319'
 	nunit.assemblies "#{WORKSPACE}/KernelTests/Bin/#{TARGET}/KernelTests.dll"
 end
 
-#desc "Test Ticker" nunit :tickertest => :build do |nunit|
-	#nunit.command = "C:/Program Files (x86)/NUnit 2.6/bin/nunit-console"
-	#nunit.options '/framework v4.0.30319'
-	#nunit.assemblies "#{WORKSPACE}/TickerTests/Bin/#{TARGET}/TickerTests.dll"
-#end
+desc "Test Ticker"
+nunit :tickertest => :build do |nunit|
+	nunit.command = NUNIT_EXE
+	nunit.options '/framework v4.0.30319'
+	nunit.assemblies "#{WORKSPACE}/TickerTests/Bin/#{TARGET}/TickerTests.dll"
+end
