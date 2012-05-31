@@ -13,6 +13,8 @@ TARGET = :Debug
 
 projects = (Dir.entries(WORKSPACE)-[".",".."]).select{|x|File.directory?(File.join(WORKSPACE,x))}.select{|x|File.exists?(File.join(WORKSPACE,x,"Properties","AssemblyInfo.cs"))}
 
+task :default => [:kernel_all_build,:kerneltest]
+
 task :kernel_all_build => [:kernel_build,:kerneltests_build]
 
 desc "Build rocNet kernel"
