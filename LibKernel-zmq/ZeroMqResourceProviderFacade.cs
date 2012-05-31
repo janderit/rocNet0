@@ -28,7 +28,7 @@ namespace LibKernel_zmq
         }
 
 
-        public int IdleCheckInterval_ms = 250;
+        public int IdleCheckInterval_ms = 10;
         private readonly Subject<long> _idleTick = new Subject<long>();
 
         public IObservable<long> OnIdle()
@@ -121,8 +121,9 @@ namespace LibKernel_zmq
                                             r.Response = response;
                                             r.Done = true;
                                         };
-
-                    Task.Factory.StartNew(worker);
+                    
+                    //Task.Factory.StartNew(worker);
+                    ThreadPool.QueueUserWorkItem(o => worker());
                 }
             }
             catch (Exception ex)

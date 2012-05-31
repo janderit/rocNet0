@@ -15,8 +15,9 @@ namespace LibKernel
 
         public Func<Request, ResourceRepresentation> Handler { get; private set; }
 
-        public ImmediateKernelRoute(Guid groupId, string nri, int energy, Func<Request, ResourceRepresentation> handler)
+        public ImmediateKernelRoute(Guid groupId, string nri, int energy, bool auth, Func<Request, ResourceRepresentation> handler)
         {
+            IsAuthoritative = auth;
             GroupId = groupId;
             Nri = nri;
             Energy = energy;
@@ -31,9 +32,11 @@ namespace LibKernel
                           };
         }
 
-        public bool Match(string nri, bool ignorecache)
+        public bool Match(string nri)
         {
             return Nri == nri;
         }
+
+        public bool IsAuthoritative { get; private set; }
     }
 }

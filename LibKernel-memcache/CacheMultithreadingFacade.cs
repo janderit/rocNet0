@@ -56,7 +56,7 @@ namespace LibKernel_memcache
                 }
                 else
                 {
-                    if (!_queuenotification.Wait(500)) if (DateTime.Now > _lastGarbageCollection + GarbageCollectionInterval)
+                    if (!_queuenotification.Wait(100)) if (DateTime.Now > _lastGarbageCollection + GarbageCollectionInterval)
                     {
                         _lastGarbageCollection = DateTime.Now;
                         TriggerGarbageCollection();

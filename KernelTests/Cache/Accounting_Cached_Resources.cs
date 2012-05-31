@@ -24,7 +24,7 @@ namespace KernelTests.Cache
         {
             var nri = "net://" + Guid.NewGuid();
 
-            Assert.IsFalse(_cacheKernelAdapter.Match(nri, false));
+            Assert.IsFalse(_cacheKernelAdapter.Match(nri));
             Assert.AreEqual(0, _cacheKernelAdapter.Statistics.ResourcesCached);
             Assert.AreEqual(0, _cacheKernelAdapter.Statistics.CacheSize);
             Assert.AreEqual(0, _cacheKernelAdapter.Statistics.CachedEnergyValue);
@@ -49,7 +49,7 @@ namespace KernelTests.Cache
 
 
             
-            Assert.IsTrue(_cacheKernelAdapter.Match(nri,false));
+            Assert.IsTrue(_cacheKernelAdapter.Match(nri));
             Assert.AreEqual(1, _cacheKernelAdapter.Statistics.ResourcesCached);
             Assert.AreEqual(rep.Resource.Size, _cacheKernelAdapter.Statistics.CacheSize);
             Assert.AreEqual(rep.Resource.Energy, _cacheKernelAdapter.Statistics.CachedEnergyValue);

@@ -16,7 +16,7 @@ namespace LibKernel_http
         {
             kernel.Routes.DeleteRoute(MyGuid);
             kernel.Routes.RegisterResourceMapping(MyGuid, "^http://(?<url>.+)$" , "net://www?url=${url}");
-            kernel.Routes.RegisterResourceHandlerRegex(MyGuid, @"^net://www\?url=(?<url>.*)$", 250, Get);
+            kernel.Routes.RegisterResourceHandlerRegex(MyGuid, @"^net://www\?url=(?<url>.*)$", 250,true, Get);
         }
 
         public ResourceRepresentation Get(Request request)

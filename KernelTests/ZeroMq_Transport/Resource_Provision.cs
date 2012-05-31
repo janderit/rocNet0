@@ -15,6 +15,7 @@ namespace KernelTests.ZeroMq_Transport
         private InProcessKernel _kernel;
         private ResourceProvider _service;
         private ZeroMqResourceProviderFacade _provider;
+        private ZeroMqResourceProviderConnector _plugin;
 
 
         [SetUp]
@@ -28,14 +29,14 @@ namespace KernelTests.ZeroMq_Transport
         private void StartKernel(){
 
             _kernel = new InProcessKernel();
-            var plugin = new ZeroMqResourceProviderConnector("tcp://localhost:15700");
-            _kernel.Routes.RegisterResourceHandler(Guid.NewGuid(), "net://test", 10, r => plugin.Get(r).Resource);
+            _plugin = new ZeroMqResourceProviderConnector("tcp://localhost:15700");
+            _kernel.Routes.RegisterResourceHandler(Guid.NewGuid(), "net://test", 10,true, r => _plugin.Get(r).Resource);
         }
 
         private void StartProvider()
         {
             var s = new InProcessKernel();
-            s.Routes.RegisterResourceHandler(Guid.NewGuid(), "net://test", 0, r => new ResourceRepresentation { NetResourceIdentifier="net://test" ,MediaType="text",Body = "Hello World" });
+            s.Routes.RegisterResourceHandler(Guid.NewGuid(), "net://test", 0, true, r => new ResourceRepresentation { NetResourceIdentifier = "net://test", MediaType = "text", Body = "Hello World" });
             _service = s;
             _provider = new ZeroMqResourceProviderFacade(_service, "tcp://127.0.0.1:15700");
             _provider.Start();
@@ -44,6 +45,7 @@ namespace KernelTests.ZeroMq_Transport
         [TearDown]
         public void StopAll()
         {
+            _plugin.Close();
             _provider.Stop();
             _kernel.Reset();
             _provider = null;
@@ -59,7 +61,9 @@ namespace KernelTests.ZeroMq_Transport
         [Test]
         public void Direct()
         {
-            Assert.AreEqual("Hello World", new ZeroMqResourceProviderConnector("tcp://localhost:15700").Get(new Request { NetResourceLocator = "net://test" }).Resource.Body);
+            var prov = new ZeroMqResourceProviderConnector("tcp://localhost:15700");
+            Assert.AreEqual("Hello World", prov.Get(new Request { NetResourceLocator = "net://test" }).Resource.Body);
+            prov.Close();
         }
 
         [Test]

@@ -32,8 +32,8 @@ namespace LibKernel_memcache
 
             kernel.AddHook(cache);
             kernel.Routes.RegisterRoute(cache.GroupId, cache);
-            kernel.Routes.RegisterResourceHandler(cache.GroupId, "net://@cache", 0, r => cache.CacheInfo("json"));
-            kernel.Routes.RegisterResourceHandler(cache.GroupId, "net://@cacheids", 0, r => cache.CacheIds());
+            kernel.Routes.RegisterResourceHandler(cache.GroupId, "net://@cache", 0,true, r => cache.CacheInfo("json"));
+            kernel.Routes.RegisterResourceHandler(cache.GroupId, "net://@cacheids", 0,true, r => cache.CacheIds());
             return cache;
         }
 
@@ -45,9 +45,14 @@ namespace LibKernel_memcache
             get { return 1; }
         }
 
-        public bool Match(string nri, bool ignorecached)
+        public bool IsAuthoritative
         {
-            return !ignorecached && _cache.Match(nri);
+            get { return false; }
+        }
+
+        public bool Match(string nri)
+        {
+            return _cache.Match(nri);
         }
         
         public Func<Request, ResourceRepresentation> Handler

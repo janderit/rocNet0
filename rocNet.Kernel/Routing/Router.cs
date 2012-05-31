@@ -27,26 +27,26 @@ namespace LibKernel
             _routes.Add(route);
         }
 
-        public void RegisterResourceHandler(Guid routeGroupId, string nri, int energy, Func<Request, ResourceRepresentation> handler)
+        public void RegisterResourceHandler(Guid routeGroupId, string nri, int energy, bool isAuthoritative, Func<Request, ResourceRepresentation> handler)
         {
-            _routes.Add(new ImmediateKernelRoute(routeGroupId, nri, energy, handler));
+            _routes.Add(new ImmediateKernelRoute(routeGroupId, nri, energy, isAuthoritative, handler));
         }
 
-        public void RegisterResourceHandlerRegex(Guid routeGroupId, string nriRegEx, int energy, Func<Request, ResourceRepresentation> handler)
+        public void RegisterResourceHandlerRegex(Guid routeGroupId, string nriRegEx, int energy, bool isAuthoritative, Func<Request, ResourceRepresentation> handler)
         {
-            _routes.Add(new RegexKernelRoute(routeGroupId, nriRegEx, energy, handler));
+            _routes.Add(new RegexKernelRoute(routeGroupId, nriRegEx, energy, isAuthoritative, handler));
         }
 
         public void RegisterResourceMapping(Guid routeGroupId, string nriregex, string replacement)
         {
-            RegisterResourceHandlerRegex(routeGroupId, nriregex, 1, new MappedRoute(nriregex, replacement, this, true).Map);
+            RegisterResourceHandlerRegex(routeGroupId, nriregex, 1, true, new MappedRoute(nriregex, replacement, _kernel).Map);
         }
 
-        public void RegisterResourceProvider(ResourceProvider provider)
+        public void RegisterResourceProvider(ResourceProvider provider, int energy, bool isAuthoritative)
         {
             var providerid = Guid.NewGuid();
 
-            RegisterResourceHandler(providerid, RoutesRequest.Get(providerid).NetResourceLocator, 1, _=>provider.Get(RoutesRequest.GetGlobal()).Guard());
+            RegisterResourceHandler(providerid, RoutesRequest.Get(providerid).NetResourceLocator,energy, isAuthoritative,  _=>provider.Get(RoutesRequest.GetGlobal()).Guard());
 
             _provider.Add(providerid, provider);
             var routeresource = _kernel.Get(RoutesRequest.Get(providerid)).Guard();
@@ -82,12 +82,12 @@ namespace LibKernel
 
         public void EnableRoutePublication()
         {
-            RegisterResourceHandler(Guid.NewGuid(), "net://@", 0, r => MediaFormatter<RoutesInformation>.Pack("net://@", new RoutesInformation { Routes = PublicRoutes().ToList() }, "json",RoutesInformation.Mediatype));
+            RegisterResourceHandler(Guid.NewGuid(), "net://@", 0, true, r => MediaFormatter<RoutesInformation>.Pack("net://@", new RoutesInformation { Routes = PublicRoutes().ToList() }, "json", RoutesInformation.Mediatype));
         }
 
         public void RegisterResourceForwarder(Guid routeGroupId, string nriregex, ResourceProvider provider, long energy)
         {
-            _routes.Add(new ForwardKernelRoute(routeGroupId, nriregex, energy, provider));
+            _routes.Add(new ForwardKernelRoute(routeGroupId, nriregex, energy,true,  provider));
         }
 
         public void DeleteRoute(Guid routeGroupId)
@@ -95,14 +95,9 @@ namespace LibKernel
             _routes.Where(_ => _.GroupId == routeGroupId).ToList().ForEach(_ => _routes.Remove(_));
         }
 
-        public KernelRoute Lookup(string nri, bool ignorecache)
+        public IEnumerable<KernelRoute> Lookup(string nri, bool ignorecache)
         {
-            var r = _routes.Where(_ => _.Match(nri, ignorecache)).OrderBy(_ => _.Energy).ToList();
-
-            //if (r.Count()==0) Console.WriteLine(nri+" ---> <none>");
-            //else Console.WriteLine(nri+" --"+r.Count()+"-> "+r.First().GetType().Name+" ["+r.First().Energy+"]");
-
-            return r.FirstOrDefault();
+            return _routes.Where(_=>!ignorecache||_.IsAuthoritative).Where(_ => _.Match(nri)).OrderBy(_ => _.Energy).ToList();
         }
 
 
@@ -118,22 +113,25 @@ namespace LibKernel
     {
         private readonly string _nriregex;
         private readonly string _replacement;
-        private readonly Router _router;
-        private readonly bool _rewritenrl;
+        private readonly ResourceProvider _kernel;
 
-        public MappedRoute(string nriregex, string replacement, Router router, bool rewritenrl)
+        public MappedRoute(string nriregex, string replacement, ResourceProvider kernel)
         {
             _nriregex = nriregex;
             _replacement = replacement;
-            _router = router;
-            _rewritenrl = rewritenrl;
+            _kernel = kernel;
         }
 
         public ResourceRepresentation Map(Request req)
         {
             var mapped = Regex.Replace(req.NetResourceLocator, _nriregex, _replacement);
-            var handler = _router.Lookup(mapped, req.IgnoreCached);
-            return handler.Handler(_rewritenrl ? new Request {Timestamp=req.Timestamp, NetResourceLocator = mapped, AcceptableMediaTypes = req.AcceptableMediaTypes} : req);
+            return
+                _kernel.Get(new Request
+                                {
+                                    Timestamp = req.Timestamp,
+                                    NetResourceLocator = mapped,
+                                    AcceptableMediaTypes = req.AcceptableMediaTypes
+                                }).Resource;
         }
     }
 }

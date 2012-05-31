@@ -63,7 +63,7 @@ namespace kernelstressfib
                     s.RemoveAt(0);
                 }
 
-                Thread.Sleep(500);
+                Thread.Sleep(2000);
 
             }
 
@@ -83,7 +83,7 @@ namespace kernelstressfib
         private string _url;
         private Thread _thread;
 
-        public int mean = 0;
+        public volatile int mean = 0;
 
         public bool Dead = false;
         private bool _killed;
@@ -124,11 +124,9 @@ namespace kernelstressfib
                     var t1 = Environment.TickCount;
                     count++;
                     total = total + t1 - t0;
-                    //Console.Clear();
-                    //Console.WriteLine(count + " - " + total/count);
                     mean = total / count;
-                    Thread.Sleep(20);
-                    if (DateTime.Now > start.AddSeconds(10) ||_killed)
+                    Thread.Sleep(50);
+                    if (DateTime.Now > start.AddSeconds(20) ||_killed)
                     {
                         Thread.CurrentThread.Abort();
                     }

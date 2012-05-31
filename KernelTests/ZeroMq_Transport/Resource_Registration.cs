@@ -16,6 +16,7 @@ namespace KernelTests.ZeroMq_Transport
         private InProcessKernel _kernel;
         private ResourceProvider _service;
         private ZeroMqResourceProviderFacade _provider;
+        private ZeroMqResourceProviderConnector _plugin;
 
 
         [SetUp]
@@ -29,14 +30,14 @@ namespace KernelTests.ZeroMq_Transport
         {
 
             _kernel = new InProcessKernel();
-            var plugin = new ZeroMqResourceProviderConnector("tcp://localhost:15700");
-            _kernel.Routes.RegisterResourceProvider(plugin);
+            _plugin = new ZeroMqResourceProviderConnector("tcp://localhost:15700");
+            _kernel.Routes.RegisterResourceProvider(_plugin,2,true);
         }
 
         private void StartProvider()
         {
             var s = new InProcessKernel();
-            s.Routes.RegisterResourceHandler(Guid.NewGuid(), "net://test", 0, r => new ResourceRepresentation { NetResourceIdentifier = "net://test", MediaType = "text", Body = "Hello World" });
+            s.Routes.RegisterResourceHandler(Guid.NewGuid(), "net://test", 0,true, r => new ResourceRepresentation { NetResourceIdentifier = "net://test", MediaType = "text", Body = "Hello World" });
             s.Routes.EnableRoutePublication();
             _service = s;
             _provider = new ZeroMqResourceProviderFacade(_service, "tcp://127.0.0.1:15700");
@@ -46,6 +47,7 @@ namespace KernelTests.ZeroMq_Transport
         [TearDown]
         public void StopAll()
         {
+            _plugin.Close();
             _provider.Stop();
             _kernel.Reset();
             _provider = null;

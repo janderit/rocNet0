@@ -6,7 +6,8 @@ namespace LibKernel
     {
         Guid GroupId { get; }
         long Energy { get; }
-        bool Match(string nri, bool ignoreCache=false);
+        bool Match(string nri);
+        bool IsAuthoritative { get; }
         Func<Request, ResourceRepresentation> Handler { get; }
     }
 }

@@ -184,19 +184,35 @@ namespace LibKernel
 
         private Response DoGet(Request request)
         {
-            var s = new ReqStat {nrl = request.NetResourceLocator,Start=Environment.TickCount,Zeit=DateTime.Now,Facaderequests=_facaderequests,ThreadId=Thread.CurrentThread.ManagedThreadId};
+            var routes = FindRoutes(request).ToList();
+            if (routes.Count()==0) return new Response{Status=ResponseCode.NotFound, Information="No route to resource"};
 
-            if (!request.NetResourceLocator.Contains("://")) request.NetResourceLocator = "net://" + request.NetResourceLocator;
+            var s = new ReqStat { nrl = request.NetResourceLocator, Start = Environment.TickCount, Zeit = DateTime.Now, Facaderequests = _facaderequests, ThreadId = Thread.CurrentThread.ManagedThreadId };
 
-            var route = _router.Lookup(request.NetResourceLocator, request.IgnoreCached);
-            if (route == null) return new Response{Status=ResponseCode.NotFound, Information="No route to resource"};
             try
             {
-                var resp = new Response { Status = ResponseCode.Ok, Information = "Ok", Resource = route.Handler(request) };
+                var resp = new Response { Status = ResponseCode.NotFound, Information = "No available route", Resource = null };
 
-                s.ok = true;
+                while (routes.Count>0)
+                {
+                    var res = routes[0].Handler(request);
+                    if (res == null)
+                    {
+                        routes.RemoveAt(0);
+                        continue;
+                    }
+                    resp = new Response { Status = ResponseCode.Ok, Information = "Ok", Resource = res };
+                    break;
+                }
+
+                if (resp.Status==ResponseCode.Ok)
+                {
+                    s.ok = true;
+                    s.nri = resp.Resource.NetResourceIdentifier;
+                }
+
                 s.Ticks = Environment.TickCount - s.Start;
-                s.nri = resp.Resource.NetResourceIdentifier;
+
                 _stat.Enqueue(s);
 
                 return resp;
@@ -210,6 +226,12 @@ namespace LibKernel
                 LastEx = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:sszzz ")+ ex.Message;
                 return new Response {Status = ResponseCode.InternalError, Information = ex.Message + " " + ex.GetType().FullName};
             }
+        }
+
+        private IEnumerable<KernelRoute> FindRoutes(Request request)
+        {
+            if (!request.NetResourceLocator.Contains("://")) request.NetResourceLocator = "net://" + request.NetResourceLocator;
+            return _router.Lookup(request.NetResourceLocator, request.IgnoreCached);
         }
 
         public ResourceRegistry Routes { get { return _router; } }

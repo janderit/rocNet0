@@ -10,10 +10,14 @@ namespace LibKernel
 
         public Guid GroupId { get; private set; }
         public long Energy { get; private set; }
+
+        public bool IsAuthoritative { get; private set; }
+
         public Func<Request, ResourceRepresentation> Handler { get; private set; }
 
-        public RegexKernelRoute(Guid groupId, string nriregex, int energy, Func<Request, ResourceRepresentation> handler)
+        public RegexKernelRoute(Guid groupId, string nriregex, int energy, bool auth, Func<Request, ResourceRepresentation> handler)
         {
+            IsAuthoritative = auth;
             NriRegex = nriregex;
             _regex = new Regex(nriregex);
             GroupId = groupId;
@@ -29,7 +33,7 @@ namespace LibKernel
             }; 
         }
 
-        public bool Match(string nri, bool ignorecache)
+        public bool Match(string nri)
         {
             return _regex.IsMatch(nri);
         }

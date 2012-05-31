@@ -110,7 +110,7 @@ namespace LibKernel_memcache
 
         public long StatHits { get { return _hits; } }
         public long StatFaults { get { return _faults; } }
-        public long StatHitRatePermega { get { return _matchrequests > 0 ? ((1000000 * _hits) / _matchrequests) : 0; } }
+        public long StatHitRatePermega { get { return (_matchrequests > 0 ? ((1000000 * _hits) / _matchrequests) : 0); } }
         public long StatDeliveredEnergy { get { return _deliveredenergy; } }
         public long StatRevocations { get { return _revoked; } }
 

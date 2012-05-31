@@ -28,30 +28,30 @@ namespace kernel
             
             _kernel = new InProcessKernel();
 
-            _kernel.Routes.RegisterResourceHandler(Guid.NewGuid(), "net://test", 0, r => new ResourceRepresentation { NetResourceIdentifier = "net://hello", MediaType = "text", Body = "Hello World" });
+            _kernel.Routes.RegisterResourceHandler(Guid.NewGuid(), "net://test", 0, true, r => new ResourceRepresentation { NetResourceIdentifier = "net://hello", MediaType = "text", Body = "Hello World" });
 
             _kernel.Routes.RegisterResourceMapping(Guid.NewGuid(), "^net://morning/(?<a>.+)$", "net://greeting/morning/${a}");
-            _kernel.Routes.RegisterResourceHandlerRegex(Guid.NewGuid(), "^net://greeting/morning/.+$", 2, Morning );
-            _kernel.Routes.RegisterResourceHandlerRegex(Guid.NewGuid(), MyRegex, 1, ServeFibonacci);
+            _kernel.Routes.RegisterResourceHandlerRegex(Guid.NewGuid(), "^net://greeting/morning/.+$", 2, true, Morning );
+            _kernel.Routes.RegisterResourceHandlerRegex(Guid.NewGuid(), MyRegex, 1,true, ServeFibonacci);
             var web = new ExternalWebrequestProvider();
             web.Register(_kernel);
             _kernel.Routes.EnableRoutePublication();
 
-            var cache = new SingleThreadedInMemoryCache();
-            //var cache = new CacheMultithreadingFacade(new SingleThreadedInMemoryCache());
+            //var cache = new SingleThreadedInMemoryCache();
+            var cache = new CacheMultithreadingFacade(new SingleThreadedInMemoryCache());
             ResourceCacheKernelAdapter.AttachTo(_kernel, ResourceCacheKernelAdapter.GenerateFallback(_kernel.Get), cache);
 
             cache.EnergySizeTradeoffFactor = 1;
             cache.MinCachableEnergy = 2;
             cache.MinimumExpirationTimesEnergyFactor = 4;
 
-            cache.MaxResourcesInCache = 30;
+            cache.MaxResourcesInCache = 60;
             cache.RemovalChunkSize = 6;
             cache.MaxCacheDurationSeconds = 30;
 
             var p = new ZeroMqResourceProviderFacade(_kernel, uri);
 
-            p.InThreadHandlingLimit = Int64.MaxValue;
+            p.InThreadHandlingLimit = Int64.MinValue;
 
             p.Start();
 

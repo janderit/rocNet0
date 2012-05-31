@@ -26,8 +26,8 @@ namespace KernelTests.Cache
             var nri = "net://" + Guid.NewGuid();
             var nrl = "net://" + Guid.NewGuid();
             
-            Assert.IsFalse(_cacheKernelAdapter.Match(nri,false));
-            Assert.IsFalse(_cacheKernelAdapter.Match(nrl,false));
+            Assert.IsFalse(_cacheKernelAdapter.Match(nri));
+            Assert.IsFalse(_cacheKernelAdapter.Match(nrl));
             Assert.AreEqual(0, _cacheKernelAdapter.Statistics.ResourcesCached);
 
             var req = new Request { NetResourceLocator = nrl };
@@ -49,8 +49,8 @@ namespace KernelTests.Cache
 
             _cacheKernelAdapter.PostProcess(req, rep);
             
-            Assert.IsTrue(_cacheKernelAdapter.Match(nri,false));
-            Assert.IsTrue(_cacheKernelAdapter.Match(nrl,false));
+            Assert.IsTrue(_cacheKernelAdapter.Match(nri));
+            Assert.IsTrue(_cacheKernelAdapter.Match(nrl));
             Assert.AreEqual(1, _cacheKernelAdapter.Statistics.ResourcesCached);
             var a = _cacheKernelAdapter.Handler(req);
             var b = _cacheKernelAdapter.Handler(req2);

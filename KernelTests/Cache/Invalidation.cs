@@ -36,8 +36,8 @@ namespace KernelTests.Cache
             AssertCacheEmpty();
             FillCache();
             _cacheKernelAdapter.Revoke(revocation);
-            Assert.IsFalse(_cacheKernelAdapter.Match(nri1,false));
-            Assert.IsTrue(_cacheKernelAdapter.Match(nri2,false));
+            Assert.IsFalse(_cacheKernelAdapter.Match(nri1));
+            Assert.IsTrue(_cacheKernelAdapter.Match(nri2));
             Assert.AreEqual(1, _cacheKernelAdapter.Statistics.ResourcesCached);
             Assert.AreEqual(10, _cacheKernelAdapter.Statistics.CacheSize);
             Assert.AreEqual(50000, _cacheKernelAdapter.Statistics.CachedEnergyValue);
@@ -89,8 +89,8 @@ namespace KernelTests.Cache
 
 
 
-            Assert.IsTrue(_cacheKernelAdapter.Match(nri1,false));
-            Assert.IsTrue(_cacheKernelAdapter.Match(nri2,false));
+            Assert.IsTrue(_cacheKernelAdapter.Match(nri1));
+            Assert.IsTrue(_cacheKernelAdapter.Match(nri2));
             Assert.AreEqual(2, _cacheKernelAdapter.Statistics.ResourcesCached);
             Assert.AreEqual(14, _cacheKernelAdapter.Statistics.CacheSize);
             Assert.AreEqual(150000, _cacheKernelAdapter.Statistics.CachedEnergyValue);
@@ -98,8 +98,8 @@ namespace KernelTests.Cache
 
         private void AssertCacheEmpty()
         {
-            Assert.IsFalse(_cacheKernelAdapter.Match(nri1,false));
-            Assert.IsFalse(_cacheKernelAdapter.Match(nri2,false));
+            Assert.IsFalse(_cacheKernelAdapter.Match(nri1));
+            Assert.IsFalse(_cacheKernelAdapter.Match(nri2));
             Assert.AreEqual(0, _cacheKernelAdapter.Statistics.ResourcesCached);
             Assert.AreEqual(0, _cacheKernelAdapter.Statistics.CacheSize);
             Assert.AreEqual(0, _cacheKernelAdapter.Statistics.CachedEnergyValue);
@@ -129,7 +129,7 @@ namespace KernelTests.Cache
 
             _backend.MinimumExpirationTimesEnergyFactor = 0;
             _cacheKernelAdapter.PostProcess(req, rep);
-            Assert.IsTrue(_cacheKernelAdapter.Match(nri1,false));
+            Assert.IsTrue(_cacheKernelAdapter.Match(nri1));
             Thread.Sleep(3000);
             _backend.TriggerGarbageCollection();
             AssertCacheEmpty();

@@ -32,7 +32,7 @@ namespace KernelTests.Basic_Functionality
         [Test]
         public void Fibonacci()
         {
-            _kernel.Routes.RegisterResourceHandlerRegex(Guid.NewGuid(), MyRegex, 1, ServeFibonacci);
+            _kernel.Routes.RegisterResourceHandlerRegex(Guid.NewGuid(), MyRegex, 1, true, ServeFibonacci);
             Assert.AreEqual(55, Fibonacci(10));
         }
 

@@ -22,7 +22,7 @@ namespace KernelTests.Cache
         [Test]
         public void Does_not_deliver_non_cached_item()
         {
-            Assert.IsFalse(_cacheKernelAdapter.Match(Guid.NewGuid().ToString(), false));
+            Assert.IsFalse(_cacheKernelAdapter.Match(Guid.NewGuid().ToString()));
         }
 
 
@@ -31,7 +31,7 @@ namespace KernelTests.Cache
         {
             var nri = "net://" + Guid.NewGuid();
 
-            Assert.IsFalse(_cacheKernelAdapter.Match(nri,false));
+            Assert.IsFalse(_cacheKernelAdapter.Match(nri));
 
             var req = new Request {NetResourceLocator=nri};
             var rep = new Response
@@ -52,7 +52,7 @@ namespace KernelTests.Cache
             _cacheKernelAdapter.PostProcess(req, rep);
 
 
-            Assert.IsTrue(_cacheKernelAdapter.Match(nri, false));
+            Assert.IsTrue(_cacheKernelAdapter.Match(nri));
             Assert.AreEqual(1, _cacheKernelAdapter.Statistics.ResourcesCached);
             var a = _cacheKernelAdapter.Handler(req);
             Assert.IsNotNull(a);
@@ -63,7 +63,7 @@ namespace KernelTests.Cache
         {
             var nri = "net://" + Guid.NewGuid();
 
-            Assert.IsFalse(_cacheKernelAdapter.Match(nri,false));
+            Assert.IsFalse(_cacheKernelAdapter.Match(nri));
 
             var req = new Request { NetResourceLocator = nri };
             var rep = new Response
@@ -84,14 +84,14 @@ namespace KernelTests.Cache
             _cacheKernelAdapter.PostProcess(req, rep);
 
 
-            Assert.IsTrue(_cacheKernelAdapter.Match(nri, false));
+            Assert.IsTrue(_cacheKernelAdapter.Match(nri));
             Assert.AreEqual(1, _cacheKernelAdapter.Statistics.ResourcesCached);
             var a = _cacheKernelAdapter.Handler(req);
             Assert.IsNotNull(a);
 
             _cacheKernelAdapter.PostProcess(req, rep);
 
-            Assert.IsTrue(_cacheKernelAdapter.Match(nri, false));
+            Assert.IsTrue(_cacheKernelAdapter.Match(nri));
             Assert.AreEqual(1, _cacheKernelAdapter.Statistics.ResourcesCached);
             var b = _cacheKernelAdapter.Handler(req);
             Assert.IsNotNull(b);
@@ -102,7 +102,7 @@ namespace KernelTests.Cache
         {
             var nri = "net://" + Guid.NewGuid();
 
-            Assert.IsFalse(_cacheKernelAdapter.Match(nri,false));
+            Assert.IsFalse(_cacheKernelAdapter.Match(nri));
 
             var original = new ResourceRepresentation
                                {
@@ -125,7 +125,7 @@ namespace KernelTests.Cache
             _cacheKernelAdapter.PostProcess(req, rep);
 
 
-            Assert.IsTrue(_cacheKernelAdapter.Match(nri, false));
+            Assert.IsTrue(_cacheKernelAdapter.Match(nri));
             Assert.AreEqual(1, _cacheKernelAdapter.Statistics.ResourcesCached);
 
             var cached = _cacheKernelAdapter.Handler(req);
