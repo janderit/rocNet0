@@ -12,12 +12,12 @@ namespace KernelTests.Cache
     class Aliasing
     {
 
-        private InMemoryCache _cache;
+        private ResourceCacheKernelAdapter _cacheKernelAdapter;
 
         [SetUp]
         public void StartCache()
         {
-            _cache = new InMemoryCache();
+            _cacheKernelAdapter = new ResourceCacheKernelAdapter(new SingleThreadedInMemoryCache());
         }
 
         [Test]
@@ -26,9 +26,9 @@ namespace KernelTests.Cache
             var nri = "net://" + Guid.NewGuid();
             var nrl = "net://" + Guid.NewGuid();
             
-            Assert.IsFalse(_cache.Match(nri));
-            Assert.IsFalse(_cache.Match(nrl));
-            Assert.AreEqual(0, _cache.ResourcesCached);
+            Assert.IsFalse(_cacheKernelAdapter.Match(nri,false));
+            Assert.IsFalse(_cacheKernelAdapter.Match(nrl,false));
+            Assert.AreEqual(0, _cacheKernelAdapter.Statistics.ResourcesCached);
 
             var req = new Request { NetResourceLocator = nrl };
             var req2 = new Request { NetResourceLocator = nri };
@@ -47,13 +47,13 @@ namespace KernelTests.Cache
                 }
             };
 
-            _cache.PostProcess(req, rep);
+            _cacheKernelAdapter.PostProcess(req, rep);
             
-            Assert.IsTrue(_cache.Match(nri));
-            Assert.IsTrue(_cache.Match(nrl));
-            Assert.AreEqual(1, _cache.ResourcesCached);
-            var a = _cache.Handler(req);
-            var b = _cache.Handler(req2);
+            Assert.IsTrue(_cacheKernelAdapter.Match(nri,false));
+            Assert.IsTrue(_cacheKernelAdapter.Match(nrl,false));
+            Assert.AreEqual(1, _cacheKernelAdapter.Statistics.ResourcesCached);
+            var a = _cacheKernelAdapter.Handler(req);
+            var b = _cacheKernelAdapter.Handler(req2);
             Assert.IsNotNull(a);
             Assert.AreSame(a,b);
         }

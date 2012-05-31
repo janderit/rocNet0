@@ -24,7 +24,7 @@ namespace LibKernel.MediaFormats
                 }
             }
 
-            return new Request {AcceptableMediaTypes = headers.Where(_=>_.Header==ResourceRequestHeaders.AcceptMediaType).Select(_=>_.Value).ToList(), NetResourceLocator=request};
+            return new Request {Timestamp = DateTime.Parse(headers.Where(_=>_.Header==ResourceRequestHeaders.Timestamp).Select(_=>_.Value).Single()), AcceptableMediaTypes = headers.Where(_=>_.Header==ResourceRequestHeaders.AcceptMediaType).Select(_=>_.Value).ToList(), NetResourceLocator=request};
         }
 
         public IEnumerable<string> Serialize(Request request)
@@ -33,7 +33,8 @@ namespace LibKernel.MediaFormats
             {
                 yield return Header(ResourceRequestHeaders.AcceptMediaType, acceptableMediaType);
             }
-            if ((request.AcceptableMediaTypes??new List<string>()).Count() > 0) yield return "";
+            yield return Header(ResourceRequestHeaders.Timestamp, request.Timestamp.ToString("yyyy-MM-ddTHH:mm:sszzz"));
+            /*if ((request.AcceptableMediaTypes??new List<string>()).Count() > 0) */yield return "";
             yield return request.NetResourceLocator;
         }
 
@@ -44,12 +45,12 @@ namespace LibKernel.MediaFormats
             {
                 yield return Header(ResponseHeaders.NetResourceIdentifier, response.Resource.NetResourceIdentifier);
                 yield return Header(ResponseHeaders.MediaType, response.Resource.MediaType);
-                yield return Header(ResponseHeaders.Modified, response.Resource.Modified.ToString("yyyy-MM-ddThh:mm:sszzz"));
+                yield return Header(ResponseHeaders.Modified, response.Resource.Modified.ToString("yyyy-MM-ddTHH:mm:sszzz"));
                 yield return Header(ResponseHeaders.Cacheable, response.Resource.Cacheable ? "YES" : "NO");
                 if (response.Resource.Cacheable)
                 {
                     if (response.Resource.Expires == DateTime.MaxValue) yield return Header(ResponseHeaders.Expires, "NEVER");
-                    else yield return Header(ResponseHeaders.Expires, response.Resource.Expires.ToString("yyyy-MM-ddThh:mm:sszzz"));
+                    else yield return Header(ResponseHeaders.Expires, response.Resource.Expires.ToString("yyyy-MM-ddTHH:mm:sszzz"));
                 }
                 yield return Header(ResponseHeaders.Energy, response.Resource.Energy.ToString());
                 yield return Header(ResponseHeaders.Size, response.Resource.Size.ToString());

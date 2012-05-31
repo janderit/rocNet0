@@ -59,7 +59,7 @@ namespace LibKernel_zmq
 
                 control.PollInHandler += handle;
 
-                message.Take(message.Count() - 1).ToList().ForEach(line => { if (control.SendMore(line, Encoding.UTF8)!=SendStatus.Sent) throw new ApplicationException("Transmissin error"); });
+                message.Take(message.Count() - 1).ToList().ForEach(line => { if (control.SendMore(line, Encoding.UTF8)!=SendStatus.Sent) throw new ApplicationException("Transmission error"); });
 
                 if (control.Send(message.Last(), Encoding.UTF8) != SendStatus.Sent) return null;
 

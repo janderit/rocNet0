@@ -8,7 +8,10 @@ namespace LibKernel
     public interface ResourceProvider
     {
         Response Get(Request request);
-        void InformQueue(long backlog);
+        void InformRequestNumber(long backlog);
+        long Estimate(Request request);
+        void InformLag(TimeSpan delay);
+        void InformQueue(int count);
     }
 
     public interface KernelRegistration

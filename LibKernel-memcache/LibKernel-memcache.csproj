@@ -43,10 +43,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="InMemoryCache.CacheOps.cs" />
-    <Compile Include="InMemoryCache.RemovalStrategy.cs" />
-    <Compile Include="InMemoryCache.Stat.cs" />
-    <Compile Include="InMemoryCache.cs" />
+    <Compile Include="CacheInformation.cs" />
+    <Compile Include="CacheMultithreadingFacade.cs" />
+    <Compile Include="SingleThreadedInMemoryCache.cs" />
+    <Compile Include="CacheImplementation.Strategies.cs" />
+    <Compile Include="ICacheResources.cs" />
+    <Compile Include="ResourceCacheKernelAdapter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -56,7 +58,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="InMemoryCache.CachingStrategy.cs" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

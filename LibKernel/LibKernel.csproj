@@ -43,11 +43,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Exceptions\MediaFormatNotSupportedException.cs" />
     <Compile Include="Exceptions\MediaTypeException.cs" />
     <Compile Include="Exceptions\RouteUnavailableException.cs" />
     <Compile Include="Exceptions\ResourceUnavailableException.cs" />
     <Compile Include="Exceptions\KernelException.cs" />
     <Compile Include="Exceptions\ResourceNotFoundException.cs" />
+    <Compile Include="MediaFormats\MediaFormatter.cs" />
     <Compile Include="PostProcessHook.cs" />
     <Compile Include="Provider\IProvideResources.cs" />
     <Compile Include="Provider\RouteInfo.cs" />

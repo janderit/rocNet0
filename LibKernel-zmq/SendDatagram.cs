@@ -14,5 +14,14 @@ namespace LibKernel_zmq
             datagram.Take(datagram.Count()-1).ToList().ForEach(_=>socket.SendMore(_, encoding));
             socket.Send(datagram.Last(), encoding);
         }
+
+        public static void SendDatagram(this Socket socket, byte[] id, IEnumerable<string> datagram, Encoding encoding = null)
+        {
+            encoding = encoding ?? Encoding.UTF8;
+            socket.SendMore(id);
+            socket.SendMore();
+            datagram.Take(datagram.Count() - 1).ToList().ForEach(_ => socket.SendMore(_, encoding));
+            socket.Send(datagram.Last(), encoding);
+        }
     }
 }

@@ -44,6 +44,8 @@ namespace LibKernel
 
                         var stat = _stat.ToList();
 
+                        var threads = stat.Select(_ => _.ThreadId).Distinct().Count();
+
                         var freqs = 0.0;
                         if (stat.Count > 0)
                         {
@@ -84,6 +86,9 @@ namespace LibKernel
                             Console.WriteLine(" Last resource access : " + last.nrl + " [" + last.Zeit + "]");
 
                         Console.WriteLine(" Average duration :     " + avg);
+                        Console.WriteLine(" Current msg delay:     " + _lag);
+                        Console.WriteLine(" Pending queue    :     " + _queuelength);
+                        Console.WriteLine(" Worker threads   :     " + threads);
 
                         Console.WriteLine(" Last error :           " + LastEx);
 
@@ -134,18 +139,35 @@ namespace LibKernel
 
         public Response Get(Request request)
         {
-            return _hooks.Aggregate(DoGet(request), (current, postProcessHook) => postProcessHook.PostProcess(request, current));
+            return _hooks.ToList().Aggregate(DoGet(request), (current, postProcessHook) => postProcessHook.PostProcess(request, current));
         }
 
-        public void InformQueue(long backlog)
+        public void InformRequestNumber(long backlog)
         {
             _facaderequests = backlog;
+        }
+
+        public long Estimate(Request request)
+        {
+            return 0;
+        }
+
+        public void InformLag(TimeSpan delay)
+        {
+            _lag = (int)Math.Round(delay.TotalMilliseconds);
+        }
+
+        public void InformQueue(int count)
+        {
+            _queuelength = count;
         }
 
         private ConcurrentQueue<ReqStat> _stat = new ConcurrentQueue<ReqStat>();
         public string LastEx = "-none-";
         private Thread _statthread;
         private long _facaderequests;
+        private int _queuelength;
+        private int _lag;
 
         class ReqStat
         {
@@ -157,15 +179,16 @@ namespace LibKernel
             public int Start;
             public int Ticks;
             public long Facaderequests;
+            public int ThreadId;
         }
 
         private Response DoGet(Request request)
         {
-            var s = new ReqStat {nrl = request.NetResourceLocator,Start=Environment.TickCount,Zeit=DateTime.Now,Facaderequests=_facaderequests};
+            var s = new ReqStat {nrl = request.NetResourceLocator,Start=Environment.TickCount,Zeit=DateTime.Now,Facaderequests=_facaderequests,ThreadId=Thread.CurrentThread.ManagedThreadId};
 
             if (!request.NetResourceLocator.Contains("://")) request.NetResourceLocator = "net://" + request.NetResourceLocator;
 
-            var route = _router.Lookup(request.NetResourceLocator);
+            var route = _router.Lookup(request.NetResourceLocator, request.IgnoreCached);
             if (route == null) return new Response{Status=ResponseCode.NotFound, Information="No route to resource"};
             try
             {
@@ -184,7 +207,7 @@ namespace LibKernel
                 s.ok = false;
                 s.Ticks = Environment.TickCount - s.Start;
                 _stat.Enqueue(s);
-                LastEx = DateTime.Now.ToString("yyyyMMddThhmmsszzz ")+ ex.Message;
+                LastEx = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:sszzz ")+ ex.Message;
                 return new Response {Status = ResponseCode.InternalError, Information = ex.Message + " " + ex.GetType().FullName};
             }
         }

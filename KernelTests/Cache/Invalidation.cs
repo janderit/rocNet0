@@ -12,12 +12,13 @@ namespace KernelTests.Cache
     [TestFixture]
     class Invalidation
     {
-        private InMemoryCache _cache;
+        private ResourceCacheKernelAdapter _cacheKernelAdapter;
 
         [SetUp]
         public void StartCache()
         {
-            _cache = new InMemoryCache();
+            _backend = new SingleThreadedInMemoryCache();
+            _cacheKernelAdapter = new ResourceCacheKernelAdapter(_backend);
         }
 
         [Test]
@@ -25,7 +26,7 @@ namespace KernelTests.Cache
         {
             AssertCacheEmpty();
             FillCache();
-            _cache.Clear();
+            _cacheKernelAdapter.Clear();
             AssertCacheEmpty();
         }
 
@@ -34,17 +35,18 @@ namespace KernelTests.Cache
         {
             AssertCacheEmpty();
             FillCache();
-            _cache.Revoke(revocation);
-            Assert.IsFalse(_cache.Match(nri1));
-            Assert.IsTrue(_cache.Match(nri2));
-            Assert.AreEqual(1, _cache.ResourcesCached);
-            Assert.AreEqual(10, _cache.CacheSize);
-            Assert.AreEqual(50000, _cache.CachedEnergyValue);
+            _cacheKernelAdapter.Revoke(revocation);
+            Assert.IsFalse(_cacheKernelAdapter.Match(nri1,false));
+            Assert.IsTrue(_cacheKernelAdapter.Match(nri2,false));
+            Assert.AreEqual(1, _cacheKernelAdapter.Statistics.ResourcesCached);
+            Assert.AreEqual(10, _cacheKernelAdapter.Statistics.CacheSize);
+            Assert.AreEqual(50000, _cacheKernelAdapter.Statistics.CachedEnergyValue);
         }
 
         private string nri1 = "net://" + Guid.NewGuid();
         private Guid revocation = Guid.NewGuid();
         private string nri2 = "net://" + Guid.NewGuid();
+        private ICacheResources _backend;
 
         private void FillCache()
         {
@@ -65,7 +67,7 @@ namespace KernelTests.Cache
                 }
             };
 
-            _cache.PostProcess(req, rep);
+            _cacheKernelAdapter.PostProcess(req, rep);
 
             req = new Request { NetResourceLocator = nri2 };
             rep = new Response
@@ -83,24 +85,24 @@ namespace KernelTests.Cache
                 }
             };
 
-            _cache.PostProcess(req, rep);
+            _cacheKernelAdapter.PostProcess(req, rep);
 
 
 
-            Assert.IsTrue(_cache.Match(nri1));
-            Assert.IsTrue(_cache.Match(nri2));
-            Assert.AreEqual(2, _cache.ResourcesCached);
-            Assert.AreEqual(14, _cache.CacheSize);
-            Assert.AreEqual(150000, _cache.CachedEnergyValue);
+            Assert.IsTrue(_cacheKernelAdapter.Match(nri1,false));
+            Assert.IsTrue(_cacheKernelAdapter.Match(nri2,false));
+            Assert.AreEqual(2, _cacheKernelAdapter.Statistics.ResourcesCached);
+            Assert.AreEqual(14, _cacheKernelAdapter.Statistics.CacheSize);
+            Assert.AreEqual(150000, _cacheKernelAdapter.Statistics.CachedEnergyValue);
         }
 
         private void AssertCacheEmpty()
         {
-            Assert.IsFalse(_cache.Match(nri1));
-            Assert.IsFalse(_cache.Match(nri2));
-            Assert.AreEqual(0, _cache.ResourcesCached);
-            Assert.AreEqual(0, _cache.CacheSize);
-            Assert.AreEqual(0, _cache.CachedEnergyValue);
+            Assert.IsFalse(_cacheKernelAdapter.Match(nri1,false));
+            Assert.IsFalse(_cacheKernelAdapter.Match(nri2,false));
+            Assert.AreEqual(0, _cacheKernelAdapter.Statistics.ResourcesCached);
+            Assert.AreEqual(0, _cacheKernelAdapter.Statistics.CacheSize);
+            Assert.AreEqual(0, _cacheKernelAdapter.Statistics.CachedEnergyValue);
         }
 
 
@@ -125,11 +127,11 @@ namespace KernelTests.Cache
                 }
             };
 
-            _cache.MinimumExpirationTimesEnergyFactor = 0;
-            _cache.PostProcess(req, rep);
-            Assert.IsTrue(_cache.Match(nri1));
+            _backend.MinimumExpirationTimesEnergyFactor = 0;
+            _cacheKernelAdapter.PostProcess(req, rep);
+            Assert.IsTrue(_cacheKernelAdapter.Match(nri1,false));
             Thread.Sleep(3000);
-            _cache.TriggerGarbageCollection();
+            _backend.TriggerGarbageCollection();
             AssertCacheEmpty();
 
 

@@ -35,16 +35,38 @@ namespace LibKernel_zmq
             }
             catch
             {
-                Console.WriteLine("*************** SOCKET RESET ******************");
-                _conn.ResetSingleton();
-                _conn = new ZeroMqConnector(_zmqUrl, true);
+                ResetSocket();
                 throw;
             }
         }
 
-        public void InformQueue(long backlog)
+        private void ResetSocket()
+        {
+            Console.WriteLine("*************** SOCKET RESET ******************");
+            var cnew = new ZeroMqConnector(_zmqUrl, true);
+            var cold = _conn;
+            cnew.ResetSingleton();
+            _conn = cnew;
+            cold.Dispose();
+        }
+
+        public void InformRequestNumber(long backlog)
         {
             // N/A
+        }
+
+        public long Estimate(Request request)
+        {
+            return 0;
+        }
+
+        public void InformLag(TimeSpan delay)
+        {
+        }
+
+        public void InformQueue(int count)
+        {
+            
         }
 
         public IEnumerable<string> GetRaw(Request request)
@@ -55,12 +77,15 @@ namespace LibKernel_zmq
             }
             catch
             {
-                Console.WriteLine("*************** SOCKET RESET ******************");
-                _conn.ResetSingleton();
-                _conn = new ZeroMqConnector(_zmqUrl, true);
+                ResetSocket();
                 throw;
             }
             
+        }
+
+        public void Close()
+        {
+            _conn.Dispose();
         }
 
     }

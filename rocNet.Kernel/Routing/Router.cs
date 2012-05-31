@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using LibKernel.MediaFormats;
 using LibKernel.Routing;
 using rocNet.Kernel.Routing;
 
@@ -50,7 +51,7 @@ namespace LibKernel
             _provider.Add(providerid, provider);
             var routeresource = _kernel.Get(RoutesRequest.Get(providerid)).Guard();
 
-            var routelist = RoutesInformation.Parse(routeresource);
+            var routelist = MediaFormatter<RoutesInformation>.Parse(routeresource, RoutesInformation.Mediatype);
 
             foreach (var routeEntry in routelist.Routes)
             {
@@ -81,7 +82,7 @@ namespace LibKernel
 
         public void EnableRoutePublication()
         {
-            RegisterResourceHandler(Guid.NewGuid(), "net://@", 0, r => RoutesInformation.Pack(new RoutesInformation { Routes = PublicRoutes().ToList() }));
+            RegisterResourceHandler(Guid.NewGuid(), "net://@", 0, r => MediaFormatter<RoutesInformation>.Pack("net://@", new RoutesInformation { Routes = PublicRoutes().ToList() }, "json",RoutesInformation.Mediatype));
         }
 
         public void RegisterResourceForwarder(Guid routeGroupId, string nriregex, ResourceProvider provider, long energy)
@@ -94,9 +95,9 @@ namespace LibKernel
             _routes.Where(_ => _.GroupId == routeGroupId).ToList().ForEach(_ => _routes.Remove(_));
         }
 
-        public KernelRoute Lookup(string nri)
+        public KernelRoute Lookup(string nri, bool ignorecache)
         {
-            var r = _routes.Where(_ => _.Match(nri)).OrderBy(_ => _.Energy).ToList();
+            var r = _routes.Where(_ => _.Match(nri, ignorecache)).OrderBy(_ => _.Energy).ToList();
 
             //if (r.Count()==0) Console.WriteLine(nri+" ---> <none>");
             //else Console.WriteLine(nri+" --"+r.Count()+"-> "+r.First().GetType().Name+" ["+r.First().Energy+"]");
@@ -131,8 +132,8 @@ namespace LibKernel
         public ResourceRepresentation Map(Request req)
         {
             var mapped = Regex.Replace(req.NetResourceLocator, _nriregex, _replacement);
-            var handler = _router.Lookup(mapped);
-            return handler.Handler(_rewritenrl ? new Request {NetResourceLocator = mapped, AcceptableMediaTypes = req.AcceptableMediaTypes} : req);
+            var handler = _router.Lookup(mapped, req.IgnoreCached);
+            return handler.Handler(_rewritenrl ? new Request {Timestamp=req.Timestamp, NetResourceLocator = mapped, AcceptableMediaTypes = req.AcceptableMediaTypes} : req);
         }
     }
 }

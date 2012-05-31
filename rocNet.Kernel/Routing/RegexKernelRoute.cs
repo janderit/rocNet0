@@ -29,7 +29,7 @@ namespace LibKernel
             }; 
         }
 
-        public bool Match(string nri)
+        public bool Match(string nri, bool ignorecache)
         {
             return _regex.IsMatch(nri);
         }

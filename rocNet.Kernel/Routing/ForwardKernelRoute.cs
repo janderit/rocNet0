@@ -23,7 +23,7 @@ namespace rocNet.Kernel.Routing
         public Guid GroupId { get; private set; }
         public long Energy { get; private set; }
 
-        public bool Match(string nri)
+        public bool Match(string nri, bool ignorecache)
         {
             return _regex.IsMatch(nri);
         }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive.Subjects;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using LibKernel;
 using LibKernel.MediaFormats;
 using ZMQ;
@@ -76,15 +77,53 @@ namespace LibKernel_zmq
 
         private long requests = 0;
 
+        class RequestHandler
+        {
+            public byte[] Id;
+            public Request Request;
+            public Response Response;
+            public bool Done;
+            public DateTime Started;
+            public Socket Socket;
+        }
+
+        private List<RequestHandler> _pending = new List<RequestHandler>();
+
+        public long InThreadHandlingLimit { get; set; }
+
         private void Handler(Socket socket, IOMultiPlex revents)
         {
             try
             {
                 requests++;
+                var id = socket.Recv();
+                var empty = socket.Recv();
                 var request = _formatter.DeserializeRequest(socket.RecvAll(Encoding.UTF8));
-                _kernel.InformQueue(requests);
-                var response = _kernel.Get(request);
-                socket.SendDatagram(_formatter.Serialize(response));
+                _kernel.InformRequestNumber(requests);
+                _kernel.InformQueue(_pending.Count);
+                _kernel.InformLag(DateTime.Now - request.Timestamp);
+
+                var energy = _kernel.Estimate(request);
+
+                if ((energy) < InThreadHandlingLimit)
+                {
+                    var response = _kernel.Get(request);
+                    socket.SendDatagram(id, _formatter.Serialize(response));
+                }
+                else
+                {
+                    var r = new RequestHandler { Id=id, Done=false, Request=request,Started=DateTime.Now,Socket=socket };
+                    _pending.Add(r);
+
+                    Action worker = () =>
+                                        {
+                                            var response = _kernel.Get(request);
+                                            r.Response = response;
+                                            r.Done = true;
+                                        };
+
+                    Task.Factory.StartNew(worker);
+                }
             }
             catch (Exception ex)
             {
@@ -95,6 +134,17 @@ namespace LibKernel_zmq
             }
         }
 
+        private void SendPendingResults()
+        {
+            var pending = _pending.Where(_ => _.Done).ToList();
+            foreach (var requestHandler in pending)
+            {
+                requestHandler.Socket.SendDatagram(requestHandler.Id, _formatter.Serialize(requestHandler.Response));
+                _pending.Remove(requestHandler);
+            }
+        }
+
+
         private volatile bool terminate = false;
 
         private void Worker()
@@ -102,7 +152,7 @@ namespace LibKernel_zmq
             try
             {
                 _context = new Context();
-                _socket = _context.Socket(SocketType.REP);
+                _socket = _context.Socket(SocketType.ROUTER);
                 _socket.PollInHandler += Handler;
                 _socket.PollErrHandler += Error;
                 _socket.Bind(_serverUri);
@@ -114,6 +164,9 @@ namespace LibKernel_zmq
                 {
                     Context.Poller(new List<Socket> { _socket }.ToArray(), IdleCheckInterval_ms * 1000);
                     _idleTick.OnNext(Environment.TickCount);
+                    _kernel.InformRequestNumber(requests);
+                    _kernel.InformQueue(_pending.Count);
+                    SendPendingResults();
                 }
 
                 _idleTick.OnCompleted();
@@ -132,6 +185,7 @@ namespace LibKernel_zmq
 
         }
 
+        
         private void Error(Socket socket, IOMultiPlex revents)
         {
             Console.WriteLine("ERROR");

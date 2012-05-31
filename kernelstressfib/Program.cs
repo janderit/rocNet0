@@ -86,6 +86,7 @@ namespace kernelstressfib
         public int mean = 0;
 
         public bool Dead = false;
+        private bool _killed;
 
         public Stressor(string url)
         {
@@ -98,7 +99,7 @@ namespace kernelstressfib
 
         public void Kill()
         {
-            _thread.Abort();
+            _killed = true;
         }
 
 
@@ -119,24 +120,29 @@ namespace kernelstressfib
                     var f = r.Next(0, 92);
 
                     var t0 = Environment.TickCount;
-                    conn.Get(new Request {NetResourceLocator = "net://fib/" + f});
+                    conn.Get(new Request { NetResourceLocator = "net://fib/" + f });
                     var t1 = Environment.TickCount;
                     count++;
                     total = total + t1 - t0;
                     //Console.Clear();
                     //Console.WriteLine(count + " - " + total/count);
-                    mean = total/count;
+                    mean = total / count;
                     Thread.Sleep(20);
-                    if (DateTime.Now > start.AddSeconds(10))
+                    if (DateTime.Now > start.AddSeconds(10) ||_killed)
                     {
                         Thread.CurrentThread.Abort();
                     }
                 }
-                
+
             }
             catch
             {
+                ;
+            }
+            finally
+            {
                 Dead = true;
+                conn.Close();
             }
         }
 

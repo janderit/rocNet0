@@ -11,12 +11,12 @@ namespace KernelTests.Cache
     [TestFixture]
     class Accounting_Cached_Resources
     {
-        private InMemoryCache _cache;
+        private ResourceCacheKernelAdapter _cacheKernelAdapter;
 
         [SetUp]
         public void StartCache()
         {
-            _cache = new InMemoryCache();
+            _cacheKernelAdapter = new ResourceCacheKernelAdapter(new SingleThreadedInMemoryCache());
         }
 
         [Test]
@@ -24,10 +24,10 @@ namespace KernelTests.Cache
         {
             var nri = "net://" + Guid.NewGuid();
 
-            Assert.IsFalse(_cache.Match(nri));
-            Assert.AreEqual(0, _cache.ResourcesCached);
-            Assert.AreEqual(0, _cache.CacheSize);
-            Assert.AreEqual(0, _cache.CachedEnergyValue);
+            Assert.IsFalse(_cacheKernelAdapter.Match(nri, false));
+            Assert.AreEqual(0, _cacheKernelAdapter.Statistics.ResourcesCached);
+            Assert.AreEqual(0, _cacheKernelAdapter.Statistics.CacheSize);
+            Assert.AreEqual(0, _cacheKernelAdapter.Statistics.CachedEnergyValue);
 
             var req = new Request { NetResourceLocator = nri };
             var rep = new Response
@@ -45,14 +45,14 @@ namespace KernelTests.Cache
                 }
             };
 
-            _cache.PostProcess(req, rep);
+            _cacheKernelAdapter.PostProcess(req, rep);
 
 
             
-            Assert.IsTrue(_cache.Match(nri));
-            Assert.AreEqual(1, _cache.ResourcesCached);
-            Assert.AreEqual(rep.Resource.Size, _cache.CacheSize);
-            Assert.AreEqual(rep.Resource.Energy, _cache.CachedEnergyValue);
+            Assert.IsTrue(_cacheKernelAdapter.Match(nri,false));
+            Assert.AreEqual(1, _cacheKernelAdapter.Statistics.ResourcesCached);
+            Assert.AreEqual(rep.Resource.Size, _cacheKernelAdapter.Statistics.CacheSize);
+            Assert.AreEqual(rep.Resource.Energy, _cacheKernelAdapter.Statistics.CachedEnergyValue);
             
         }
 

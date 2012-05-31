@@ -37,17 +37,22 @@ namespace kernel
             web.Register(_kernel);
             _kernel.Routes.EnableRoutePublication();
 
-            var cache = InMemoryCache.AttachTo(_kernel);
+            var cache = new SingleThreadedInMemoryCache();
+            //var cache = new CacheMultithreadingFacade(new SingleThreadedInMemoryCache());
+            ResourceCacheKernelAdapter.AttachTo(_kernel, ResourceCacheKernelAdapter.GenerateFallback(_kernel.Get), cache);
 
             cache.EnergySizeTradeoffFactor = 1;
-            cache.MinCachableEnergy = 0;
-            cache.MinimumExpirationTimesEnergyFactor = 0;
+            cache.MinCachableEnergy = 2;
+            cache.MinimumExpirationTimesEnergyFactor = 4;
 
-            cache.MaxResourcesInCache = 20;
-            cache.RemovalChunkSize =5;
-            cache.MaxCacheDurationSeconds = 20;
+            cache.MaxResourcesInCache = 30;
+            cache.RemovalChunkSize = 6;
+            cache.MaxCacheDurationSeconds = 30;
 
             var p = new ZeroMqResourceProviderFacade(_kernel, uri);
+
+            p.InThreadHandlingLimit = Int64.MaxValue;
+
             p.Start();
 
             Console.WriteLine("Kernel running on "+uri+" ...");
