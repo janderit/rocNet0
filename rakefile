@@ -1,0 +1,84 @@
+require 'albacore'
+gem 'rubyzip'
+require 'zip/zip'
+require 'zip/zipfilesystem'
+
+# cd WORKSPACE
+# %systemroot%\Microsoft.NET\Framework64\v4.0.30319\MSBuild
+
+
+WORKSPACE = ENV["WORKSPACE"] || "."
+BUILD_NUMBER = ENV["BUILD_NUMBER"] || "0"
+TARGET = :Debug
+
+projects = (Dir.entries(WORKSPACE)-[".",".."]).select{|x|File.directory?(File.join(WORKSPACE,x))}.select{|x|File.exists?(File.join(WORKSPACE,x,"Properties","AssemblyInfo.cs"))}
+
+task :kernel_all_build => [:kernel_build,:kerneltests_build]
+
+desc "Build rocNet kernel"
+msbuild :kernel_build => :libkernel_build do |msb|
+  msb.properties :configuration => TARGET
+  msb.targets :Clean, :Build
+  msb.solution = "rocnet.kernel/rocnet.kernel.csproj"
+end
+
+desc "Build kernel tests"
+msbuild :kerneltests_build => [:kernel_build,:libkernel_build,:libkernel_memcache_build,:libkernel_zmq_build] do |msb|
+  msb.properties :configuration => TARGET
+  msb.targets :Clean, :Build
+  msb.solution = "KernelTests/KernelTests.csproj"
+end
+
+desc "Build libkernel"
+msbuild :libkernel_build do |msb|
+  msb.properties :configuration => TARGET
+  msb.targets :Clean, :Build
+  msb.solution = "LibKernel/LibKernel.csproj"
+end
+
+desc "Build libkernel-memcache"
+msbuild :libkernel_memcache_build do |msb|
+  msb.properties :configuration => TARGET
+  msb.targets :Clean, :Build
+  msb.solution = "LibKernel-memcache/LibKernel-memcache.csproj"
+end
+
+desc "Build libkernel-zmq"
+msbuild :libkernel_zmq_build do |msb|
+  msb.properties :configuration => TARGET
+  msb.targets :Clean, :Build
+  msb.solution = "LibKernel-zmq/LibKernel-zmq.csproj"
+end
+
+
+
+#assemblyinfo :assemblyinfo => :loadtargetversion do |asm|
+  #asm.version = VERSIONSTRING
+  #asm.file_version = VERSIONSTRING
+#
+  #asm.company_name = "Jander IT"
+  #asm.copyright = "Philip Jander (c) 2012"
+  #asm.output_file = "AssemblyInfo.cs"
+#end
+
+
+task :loadtargetversion do 	
+	file = File.new("version.txt", "r")
+	VERSIONSTRING=file.gets+BUILD_NUMBER
+	file.close
+	puts VERSIONSTRING
+end
+
+
+desc "Test rocNet Kernel" 
+nunit :kerneltest => :kerneltests_build do |nunit|
+	nunit.command = "C:/Program Files (x86)/NUnit 2.6/bin/nunit-console"
+	nunit.options '/framework v4.0.30319'
+	nunit.assemblies "#{WORKSPACE}/KernelTests/Bin/#{TARGET}/KernelTests.dll"
+end
+
+#desc "Test Ticker" nunit :tickertest => :build do |nunit|
+	#nunit.command = "C:/Program Files (x86)/NUnit 2.6/bin/nunit-console"
+	#nunit.options '/framework v4.0.30319'
+	#nunit.assemblies "#{WORKSPACE}/TickerTests/Bin/#{TARGET}/TickerTests.dll"
+#end
