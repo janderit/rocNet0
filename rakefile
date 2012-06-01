@@ -3,6 +3,8 @@ gem 'rubyzip'
 require 'zip/zip'
 require 'zip/zipfilesystem'
 
+# TODO: improve multi-project http://www.stuartellis.eu/articles/rake/#scaling
+
 
 PRODUCT_NAME = "rocNet Kernel"
 COMPANY_NAME = "Jander.IT"
@@ -157,7 +159,7 @@ end
 
 task :loadtargetversion do 	
 	file = File.new("version.txt", "r")
-	VERSIONSTRING=file.gets+BUILD_NUMBER
+	VERSIONSTRING=file.gets+"."+BUILD_NUMBER
 	file.close
 	puts VERSIONSTRING
 end

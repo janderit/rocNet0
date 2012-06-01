@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Ticker", "Ticker", "{1CCBE5C8-ABA7-4177-B1AB-895C164221E2}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "rocNet-Ticker", "rocNet-Ticker", "{1CCBE5C8-ABA7-4177-B1AB-895C164221E2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibTicker", "LibTicker\LibTicker.csproj", "{BAD4419E-9609-430F-B62E-3468071B8644}"
 EndProject
@@ -9,9 +9,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TickerTests", "TickerTests\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibTicker-zmq", "LibTicker-zmq\LibTicker-zmq.csproj", "{E480F156-244C-46F3-B369-0F2B4A29F8B4}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Kernel", "Kernel", "{F0EAF5E9-9F76-4C7B-82D9-4092BA812005}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "rocNet-Kernel", "rocNet-Kernel", "{F0EAF5E9-9F76-4C7B-82D9-4092BA812005}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EventStore", "EventStore", "{E22227E8-F857-44CF-9DF9-A6251C6BEF43}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "rocNet-EventStore", "rocNet-EventStore", "{E22227E8-F857-44CF-9DF9-A6251C6BEF43}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibKernel", "LibKernel\LibKernel.csproj", "{FBDF24F4-D716-4C3F-8FCC-E4D6D6F02A65}"
 EndProject
@@ -29,14 +29,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kernel", "kernel\kernel.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibKernel-memcache", "LibKernel-memcache\LibKernel-memcache.csproj", "{7C5DEF0D-6F96-4291-BB69-F2E9A0DAF85B}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "kernel-demo", "kernel-demo", "{80777EB0-7A7B-4A4C-A399-D161BF0AF1AB}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Demo", "Demo", "{80777EB0-7A7B-4A4C-A399-D161BF0AF1AB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kernelstressfib", "kernelstressfib\kernelstressfib.csproj", "{75B2A81E-FB9B-4378-A6B5-F93DBCC24584}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3DB3EC4D-6B30-4C85-AF7C-F3790C864C38}"
 	ProjectSection(SolutionItems) = preProject
+		rakefile = rakefile
 		version.txt = version.txt
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "rocNet-CQRS", "rocNet-CQRS", "{B033AD13-7212-4ED8-8577-C43853C1C1A5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

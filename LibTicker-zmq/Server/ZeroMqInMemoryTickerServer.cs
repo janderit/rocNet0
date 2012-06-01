@@ -116,7 +116,7 @@ namespace LibTicker.Server
         private void Worker()
         {
             Thread.CurrentThread.IsBackground = true;
-            while (!_terminated) Context.Poller(new List<Socket> {_post, _outofband}.ToArray(), 250000);
+            while (!_terminated) Context.Poller(new List<Socket> {_post, _outofband}.ToArray(), 10000);
         }
 
         public void Shutdown()
