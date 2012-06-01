@@ -1,6 +1,6 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
-[assembly: AssemblyTitle("Kernel zeromq support (x64)")]
+[assembly: AssemblyTitle("Kernel zeromq transport (x64)")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyCompany("Jander.IT")]
 [assembly: AssemblyProduct("rocNet Kernel")]

@@ -12,13 +12,18 @@ BUILD_NUMBER = ENV["BUILD_NUMBER"] || "0"
 TARGET = :Debug
 
 NUNIT_EXE="C:/Program Files (x86)/NUnit 2.6/bin/nunit-console"
+DOTNET_FRAMEWORK_VERSION="v4.0.30319"
 
 
 projects = (Dir.entries(WORKSPACE)-[".",".."]).select{|x|File.directory?(File.join(WORKSPACE,x))}.select{|x|File.exists?(File.join(WORKSPACE,x,"Properties","AssemblyInfo.cs"))}
 
-task :default => [:kernel_all_build,:kerneltest]
+task :default => [:kernel,:ticker]
 
-task :kernel_all_build => [:kernel_build,:kerneltests_build]
+task :kernel => [:kernel_all_build,:kerneltest]
+task :ticker => [:ticker_all_build,:tickertest]
+
+task :kernel_all_build => [:kernel_build,:libkernel_build,:libkernel_memcache_build,:libkernel_zmq_build]
+task :ticker_all_build => [:libticker_build,:libticker_zmq_build]
 
 desc "Build rocNet kernel"
 msbuild :kernel_build => [:libkernel_build,:kernel_info] do |msb|
@@ -93,7 +98,33 @@ end
 
 assemblyinfo :libkernel_zmq_info => :loadtargetversion do |asm|
   asm.output_file = "LibKernel-zmq/Properties/AssemblyInfo.cs"  
-  asm.title = "Kernel zeromq support (x64)"
+  asm.title = "Kernel zeromq transport (x64)"
+  asm.description = ""
+  asm.product_name = PRODUCT_NAME
+  asm.company_name = COMPANY_NAME
+  asm.copyright = COPYRIGHT
+  asm.version = VERSIONSTRING
+  asm.file_version = VERSIONSTRING
+  asm.custom_attributes :ComVisible => false
+end
+
+desc "Build ticker tests"
+msbuild :tickertests_build => [:libticker_build,:libticker_zmq_build] do |msb|
+  msb.properties :configuration => TARGET
+  msb.targets :Clean, :Build
+  msb.solution = "TickerTests/TickerTests.csproj"
+end
+
+desc "Build libticker"
+msbuild :libticker_build =>[:libticker_info] do |msb|
+  msb.properties :configuration => TARGET
+  msb.targets :Clean, :Build
+  msb.solution = "LibTicker/LibTicker.csproj"
+end
+
+assemblyinfo :libticker_info => :loadtargetversion do |asm|
+  asm.output_file = "LibTicker/Properties/AssemblyInfo.cs"
+  asm.title = "Ticker client library"
   asm.description = ""
   asm.product_name = PRODUCT_NAME
   asm.company_name = COMPANY_NAME
@@ -104,8 +135,24 @@ assemblyinfo :libkernel_zmq_info => :loadtargetversion do |asm|
 end
 
 
+desc "Build libticker-zmq"
+msbuild :libticker_zmq_build =>[:libticker_zmq_info] do |msb|
+  msb.properties :configuration => TARGET
+  msb.targets :Clean, :Build
+  msb.solution = "LibTicker-zmq/LibTicker-zmq.csproj"
+end
 
-
+assemblyinfo :libticker_zmq_info => :loadtargetversion do |asm|
+  asm.output_file = "LibTicker-zmq/Properties/AssemblyInfo.cs"
+  asm.title = "Ticker zeromq transport (x64)"
+  asm.description = ""
+  asm.product_name = PRODUCT_NAME
+  asm.company_name = COMPANY_NAME
+  asm.copyright = COPYRIGHT
+  asm.version = VERSIONSTRING
+  asm.file_version = VERSIONSTRING
+  asm.custom_attributes :ComVisible => false
+end
 
 
 task :loadtargetversion do 	
@@ -119,13 +166,13 @@ end
 desc "Test rocNet Kernel" 
 nunit :kerneltest => :kerneltests_build do |nunit|
 	nunit.command = NUNIT_EXE
-	nunit.options '/framework v4.0.30319'
+	nunit.options '/framework '+DOTNET_FRAMEWORK_VERSION
 	nunit.assemblies "#{WORKSPACE}/KernelTests/Bin/#{TARGET}/KernelTests.dll"
 end
 
 desc "Test Ticker"
-nunit :tickertest => :build do |nunit|
+nunit :tickertest => :tickertests_build do |nunit|
 	nunit.command = NUNIT_EXE
-	nunit.options '/framework v4.0.30319'
+	nunit.options '/framework '+DOTNET_FRAMEWORK_VERSION
 	nunit.assemblies "#{WORKSPACE}/TickerTests/Bin/#{TARGET}/TickerTests.dll"
 end
