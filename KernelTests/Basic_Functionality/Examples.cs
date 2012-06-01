@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using LibKernel;
 using LibKernel_http;
 using NUnit.Framework;
+using rocNet.Kernel;
 
 namespace KernelTests.Basic_Functionality
 {

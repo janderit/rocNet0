@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
+using LibKernel;
 using LibKernel.MediaFormats;
 using LibKernel.Routing;
-using rocNet.Kernel.Routing;
 
-namespace LibKernel
+namespace rocNet.Kernel.Routing
 {
     class Router : ResourceRegistry
     {
@@ -73,10 +71,10 @@ namespace LibKernel
                 ;
         }
 
-        private IEnumerable<Routing.RouteEntry> PublicRoutes()
+        private IEnumerable<RouteEntry> PublicRoutes()
         {
-            var ri = _routes.OfType<ImmediateKernelRoute>().Select(_=>new Routing.RouteEntry{Identifier=_.Nri, Energy = _.Energy});
-            ri = ri.Union(_routes.OfType<RegexKernelRoute>().Select(_ => new Routing.RouteEntry { Regex = _.NriRegex, Energy = _.Energy }));
+            var ri = _routes.OfType<ImmediateKernelRoute>().Select(_=>new RouteEntry{Identifier=_.Nri, Energy = _.Energy});
+            ri = ri.Union(_routes.OfType<RegexKernelRoute>().Select(_ => new RouteEntry { Regex = _.NriRegex, Energy = _.Energy }));
             return ri.ToList();
         }
 
@@ -105,33 +103,6 @@ namespace LibKernel
         public void Reset()
         {
             _routes.Clear();
-        }
-    }
-
-    
-    internal class MappedRoute
-    {
-        private readonly string _nriregex;
-        private readonly string _replacement;
-        private readonly ResourceProvider _kernel;
-
-        public MappedRoute(string nriregex, string replacement, ResourceProvider kernel)
-        {
-            _nriregex = nriregex;
-            _replacement = replacement;
-            _kernel = kernel;
-        }
-
-        public ResourceRepresentation Map(Request req)
-        {
-            var mapped = Regex.Replace(req.NetResourceLocator, _nriregex, _replacement);
-            return
-                _kernel.Get(new Request
-                                {
-                                    Timestamp = req.Timestamp,
-                                    NetResourceLocator = mapped,
-                                    AcceptableMediaTypes = req.AcceptableMediaTypes
-                                }).Resource;
         }
     }
 }

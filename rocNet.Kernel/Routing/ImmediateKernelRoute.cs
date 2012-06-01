@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using LibKernel;
+using LibKernel.Routing;
 
-namespace LibKernel
+namespace rocNet.Kernel.Routing
 {
     internal class ImmediateKernelRoute : KernelRoute
     {

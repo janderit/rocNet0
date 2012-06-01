@@ -5,6 +5,7 @@ using System.Text;
 using LibKernel;
 using LibKernel_zmq;
 using NUnit.Framework;
+using rocNet.Kernel;
 
 namespace KernelTests.ZeroMq_Transport
 {

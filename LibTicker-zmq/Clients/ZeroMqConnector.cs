@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using ZMQ;
 
-namespace LibTicker.Clients
+namespace LibTicker_zmq.Clients
 {
     class ZeroMqConnector : IDisposable
     {

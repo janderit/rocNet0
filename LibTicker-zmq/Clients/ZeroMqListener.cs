@@ -7,9 +7,10 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text;
 using System.Threading;
+using LibTicker;
 using ZMQ;
 
-namespace LibTicker.Clients
+namespace LibTicker_zmq.Clients
 {
     public class ZeroMqListener : TickerService, IDisposable
     {

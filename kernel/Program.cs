@@ -7,9 +7,11 @@ using System.Text.RegularExpressions;
 using System.Reactive;
 using System.Reactive.Linq;
 using LibKernel;
+using LibKernel.Provider;
 using LibKernel_http;
 using LibKernel_memcache;
 using LibKernel_zmq;
+using rocNet.Kernel;
 
 namespace kernel
 {
@@ -37,7 +39,6 @@ namespace kernel
             web.Register(_kernel);
             _kernel.Routes.EnableRoutePublication();
 
-            //var cache = new SingleThreadedInMemoryCache();
             var cache = new CacheMultithreadingFacade(new SingleThreadedInMemoryCache());
             ResourceCacheKernelAdapter.AttachTo(_kernel, ResourceCacheKernelAdapter.GenerateFallback(_kernel.Get), cache);
 
@@ -49,10 +50,8 @@ namespace kernel
             cache.RemovalChunkSize = 6;
             cache.MaxCacheDurationSeconds = 30;
 
-            var p = new ZeroMqResourceProviderFacade(_kernel, uri);
-
-            p.InThreadHandlingLimit = Int64.MinValue;
-
+            var f = new MultithreadedResourceProviderFacade(_kernel) {InThreadHandlingLimit = Int64.MinValue};
+            var p = new ZeroMqResourceProviderFacade(f, uri);
             p.Start();
 
             Console.WriteLine("Kernel running on "+uri+" ...");

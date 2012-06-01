@@ -43,8 +43,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CacheConfiguration.cs" />
+    <Compile Include="CacheEntry.cs" />
     <Compile Include="CacheInformation.cs" />
     <Compile Include="CacheMultithreadingFacade.cs" />
+    <Compile Include="CacheStatistics.cs" />
     <Compile Include="SingleThreadedInMemoryCache.cs" />
     <Compile Include="CacheImplementation.Strategies.cs" />
     <Compile Include="ICacheResources.cs" />

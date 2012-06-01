@@ -13,11 +13,4 @@ namespace LibKernel
         void InformLag(TimeSpan delay);
         void InformQueue(int count);
     }
-
-    public interface KernelRegistration
-    {
-        ResourceRegistry Routes { get; }
-        void AddHook(PostProcessHook hook);
-    }
-
 }

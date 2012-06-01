@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using LibKernel;
 using NUnit.Framework;
+using rocNet.Kernel;
 
 namespace KernelTests.Basic_Functionality
 {

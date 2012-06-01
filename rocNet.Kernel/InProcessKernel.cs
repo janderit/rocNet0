@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reactive.Subjects;
-using System.Text;
 using System.Threading;
+using LibKernel;
 using LibKernel.Exceptions;
+using LibKernel.Routing;
+using rocNet.Kernel.Routing;
 
-namespace LibKernel
+namespace rocNet.Kernel
 {
     public class InProcessKernel : ResourceProvider, KernelRegistration
     {

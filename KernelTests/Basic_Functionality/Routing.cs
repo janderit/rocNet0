@@ -6,6 +6,7 @@ using System.Text;
 using LibKernel;
 using LibKernel.Exceptions;
 using NUnit.Framework;
+using rocNet.Kernel;
 
 namespace KernelTests.Basic_Functionality
 {

@@ -49,9 +49,13 @@
     <Compile Include="Exceptions\ResourceUnavailableException.cs" />
     <Compile Include="Exceptions\KernelException.cs" />
     <Compile Include="Exceptions\ResourceNotFoundException.cs" />
+    <Compile Include="KernelRegistration.cs" />
+    <Compile Include="MediaFormats\HeaderLine.cs" />
     <Compile Include="MediaFormats\MediaFormatter.cs" />
     <Compile Include="PostProcessHook.cs" />
+    <Compile Include="Provider\AsyncRequestHandler.cs" />
     <Compile Include="Provider\IProvideResources.cs" />
+    <Compile Include="Provider\MultithreadedResourceProviderFacade.cs" />
     <Compile Include="Provider\RouteInfo.cs" />
     <Compile Include="ResponseGuardExtension.cs" />
     <Compile Include="ResponseHeaders.cs" />
@@ -66,6 +70,7 @@
     <Compile Include="Response.cs" />
     <Compile Include="ResponseCode.cs" />
     <Compile Include="Routing\KernelRoute.cs" />
+    <Compile Include="Routing\RouteEntry.cs" />
     <Compile Include="Routing\RoutesInformation.cs" />
     <Compile Include="Routing\RoutesRequest.cs" />
   </ItemGroup>

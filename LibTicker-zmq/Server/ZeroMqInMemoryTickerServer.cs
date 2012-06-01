@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using LibTicker;
 using LibTicker.Clients;
+using LibTicker.Server;
 using ZMQ;
 
-namespace LibTicker.Server
+namespace LibTicker_zmq.Server
 {
     public class ZeroMqInMemoryTickerServer
     {

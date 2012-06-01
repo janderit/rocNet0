@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using LibKernel;
+using LibKernel.Routing;
 
-namespace LibKernel
+namespace rocNet.Kernel.Routing
 {
     internal class RegexKernelRoute:KernelRoute
     {

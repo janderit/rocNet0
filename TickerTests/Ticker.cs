@@ -1,6 +1,8 @@
-﻿using System;
+﻿using LibTicker;
+using LibTicker.Clients;
+using LibTicker_zmq.Clients;
 
-namespace LibTicker
+namespace TickerTests
 {
     public static class Ticker
     {
@@ -8,12 +10,12 @@ namespace LibTicker
         {
             public static TickerPublisher Loopback()
             {
-                return new Clients.LoopbackPublisher();
+                return new LoopbackPublisher();
             }
 
             public static TickerPublisher ZeroMq(string uri, string ident)
             {
-                return new Clients.ZeroMqPublisher(uri, ident);
+                return new ZeroMqPublisher(uri, ident);
             }
         }
 
@@ -22,12 +24,12 @@ namespace LibTicker
         {
             public static TickerService Loopback()
             {
-                return new Clients.LoopbackListener();
+                return new LoopbackListener();
             }
 
             public static TickerService ZeroMq(string inbandUri, string outofbandUri)
             {
-                return new Clients.ZeroMqListener(inbandUri, outofbandUri);
+                return new ZeroMqListener(inbandUri, outofbandUri);
             }
         }
     }

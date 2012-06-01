@@ -7,6 +7,7 @@ using LibKernel;
 using LibKernel_http;
 using LibKernel_zmq;
 using NUnit.Framework;
+using rocNet.Kernel;
 
 namespace KernelTests.ZeroMq_Transport
 {

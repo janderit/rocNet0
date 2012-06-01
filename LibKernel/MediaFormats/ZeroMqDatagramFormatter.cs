@@ -151,11 +151,4 @@ namespace LibKernel.MediaFormats
             return header.Trim() + ": " + value.Trim();
         }
     }
-
-    struct HeaderLine
-    {
-        internal string Header;
-        internal string Value;
-    }
-
 }

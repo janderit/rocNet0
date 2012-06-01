@@ -7,6 +7,7 @@ using System.Threading;
 using LibTicker;
 using LibTicker.Clients;
 using LibTicker.Server;
+using LibTicker_zmq.Server;
 using NUnit.Framework;
 
 namespace TickerTests.Filter

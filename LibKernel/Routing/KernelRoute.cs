@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LibKernel
+namespace LibKernel.Routing
 {
     public interface KernelRoute
     {

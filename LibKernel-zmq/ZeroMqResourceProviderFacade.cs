@@ -4,9 +4,9 @@ using System.Linq;
 using System.Reactive.Subjects;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using LibKernel;
 using LibKernel.MediaFormats;
+using LibKernel.Provider;
 using ZMQ;
 using Exception = System.Exception;
 
@@ -14,11 +14,10 @@ namespace LibKernel_zmq
 {
     public class ZeroMqResourceProviderFacade
     {
-        private readonly ResourceProvider _kernel;
         private readonly string _serverUri;
         private static Context _context;
         private Socket _socket;
-        private ZeroMqDatagramFormatter _formatter;
+        private readonly ZeroMqDatagramFormatter _formatter;
         private Thread _worker;
         private Barrier _barrier;
 
@@ -27,6 +26,12 @@ namespace LibKernel_zmq
             _context = new Context();
         }
 
+        public ZeroMqResourceProviderFacade EnableProviderRouteScan(ResourceRegistry registry)
+        {
+            if (registry == null) throw new ArgumentNullException("registry");
+            _providerRouteScanEnabled = true;
+            return this;
+        }
 
         public int IdleCheckInterval_ms = 10;
         private readonly Subject<long> _idleTick = new Subject<long>();
@@ -36,11 +41,26 @@ namespace LibKernel_zmq
             return _idleTick;
         }
 
-        public ZeroMqResourceProviderFacade(ResourceProvider kernel, string serverUri)
+        public ZeroMqResourceProviderFacade(MultithreadedResourceProviderFacade facade, string serverUri):this(serverUri)
         {
-            if (kernel == null) throw new ArgumentNullException("kernel");
+            if (facade == null) throw new ArgumentNullException("facade");
+
+            _work = facade.GetAndContinue;
+            _sendPendingResults = facade.SynchronizedDeliverResponses;
+        }
+
+        public ZeroMqResourceProviderFacade(ResourceProvider provider, string serverUri)
+            : this(serverUri)
+        {
+            if (provider == null) throw new ArgumentNullException("provider");
+
+            _work = (request, reply) => { reply(provider.Get(request)); };
+            _sendPendingResults = () => { };
+        }
+
+        private ZeroMqResourceProviderFacade(string serverUri)
+        {
             if (serverUri == null) throw new ArgumentNullException("serverUri");
-            _kernel = kernel;
             _serverUri = serverUri;
             _formatter = new ZeroMqDatagramFormatter();
         }
@@ -69,62 +89,31 @@ namespace LibKernel_zmq
         private void TerminateWorker()
         {
             _barrier = new Barrier(2);
-            terminate = true;
+            _terminate = true;
             _barrier.SignalAndWait();
             _barrier.Dispose();
             _barrier = null;
         }
 
-        private long requests = 0;
-
-        class RequestHandler
-        {
-            public byte[] Id;
-            public Request Request;
-            public Response Response;
-            public bool Done;
-            public DateTime Started;
-            public Socket Socket;
-        }
-
-        private List<RequestHandler> _pending = new List<RequestHandler>();
-
-        public long InThreadHandlingLimit { get; set; }
+        private List<CometHandler> _comets = new List<CometHandler>();
 
         private void Handler(Socket socket, IOMultiPlex revents)
         {
             try
             {
-                requests++;
                 var id = socket.Recv();
-                var empty = socket.Recv();
-                var request = _formatter.DeserializeRequest(socket.RecvAll(Encoding.UTF8));
-                _kernel.InformRequestNumber(requests);
-                _kernel.InformQueue(_pending.Count);
-                _kernel.InformLag(DateTime.Now - request.Timestamp);
+                DiscardEmptyLine(socket);
+                var datagram = socket.RecvAll(Encoding.UTF8);
 
-                var energy = _kernel.Estimate(request);
-
-                if ((energy) < InThreadHandlingLimit)
+                if (_providerRouteScanEnabled && datagram.Count == 2 && datagram.First() == "@listen")
                 {
-                    var response = _kernel.Get(request);
-                    socket.SendDatagram(id, _formatter.Serialize(response));
+                    _comets.Add(new CometHandler(id, new Guid(datagram.Skip(1).First())));
+                    return;
                 }
-                else
-                {
-                    var r = new RequestHandler { Id=id, Done=false, Request=request,Started=DateTime.Now,Socket=socket };
-                    _pending.Add(r);
 
-                    Action worker = () =>
-                                        {
-                                            var response = _kernel.Get(request);
-                                            r.Response = response;
-                                            r.Done = true;
-                                        };
-                    
-                    //Task.Factory.StartNew(worker);
-                    ThreadPool.QueueUserWorkItem(o => worker());
-                }
+                var request = _formatter.DeserializeRequest(datagram);
+
+                _work(request, response => socket.SendDatagram(id, _formatter.Serialize(response)));
             }
             catch (Exception ex)
             {
@@ -135,18 +124,16 @@ namespace LibKernel_zmq
             }
         }
 
-        private void SendPendingResults()
+        private readonly Action<Request, Action<Response>> _work;
+        private Action _sendPendingResults;
+
+        private static void DiscardEmptyLine(Socket socket)
         {
-            var pending = _pending.Where(_ => _.Done).ToList();
-            foreach (var requestHandler in pending)
-            {
-                requestHandler.Socket.SendDatagram(requestHandler.Id, _formatter.Serialize(requestHandler.Response));
-                _pending.Remove(requestHandler);
-            }
+            socket.Recv();
         }
 
-
-        private volatile bool terminate = false;
+        private volatile bool _terminate = false;
+        private bool _providerRouteScanEnabled;
 
         private void Worker()
         {
@@ -155,19 +142,17 @@ namespace LibKernel_zmq
                 _context = new Context();
                 _socket = _context.Socket(SocketType.ROUTER);
                 _socket.PollInHandler += Handler;
-                _socket.PollErrHandler += Error;
                 _socket.Bind(_serverUri);
 
                 Thread.CurrentThread.IsBackground = true;
                 _barrier.SignalAndWait();
 
-                while (!terminate)
+                while (!_terminate)
                 {
                     Context.Poller(new List<Socket> { _socket }.ToArray(), IdleCheckInterval_ms * 1000);
                     _idleTick.OnNext(Environment.TickCount);
-                    _kernel.InformRequestNumber(requests);
-                    _kernel.InformQueue(_pending.Count);
-                    SendPendingResults();
+
+                    _sendPendingResults();
                 }
 
                 _idleTick.OnCompleted();
@@ -186,11 +171,5 @@ namespace LibKernel_zmq
 
         }
 
-        
-        private void Error(Socket socket, IOMultiPlex revents)
-        {
-            Console.WriteLine("ERROR");
-            Console.ReadLine();
-        }
     }
 }
