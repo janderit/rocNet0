@@ -40,7 +40,7 @@ namespace KernelTests.ZeroMq_Transport
 
 
 
-        [Test]
+        [Test, Category("ZeroMQ")]
         public void Fibonacci()
         {
             _kernel.Routes.RegisterResourceHandlerRegex(Guid.NewGuid(), MyRegex, 1,true, ServeFibonacci);

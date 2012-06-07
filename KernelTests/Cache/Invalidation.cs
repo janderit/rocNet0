@@ -13,6 +13,7 @@ namespace KernelTests.Cache
     class Invalidation
     {
         private ResourceCacheKernelAdapter _cacheKernelAdapter;
+        private ICacheResources _backend;
 
         [SetUp]
         public void StartCache()
@@ -21,7 +22,7 @@ namespace KernelTests.Cache
             _cacheKernelAdapter = new ResourceCacheKernelAdapter(_backend);
         }
 
-        [Test]
+        [Test, Category("Smoke")]
         public void Clear_cache()
         {
             AssertCacheEmpty();
@@ -30,7 +31,7 @@ namespace KernelTests.Cache
             AssertCacheEmpty();
         }
 
-        [Test]
+        [Test, Category("Unit")]
         public void Invalidate_single_resource()
         {
             AssertCacheEmpty();
@@ -46,7 +47,7 @@ namespace KernelTests.Cache
         private string nri1 = "net://" + Guid.NewGuid();
         private Guid revocation = Guid.NewGuid();
         private string nri2 = "net://" + Guid.NewGuid();
-        private ICacheResources _backend;
+        
 
         private void FillCache()
         {
@@ -106,7 +107,7 @@ namespace KernelTests.Cache
         }
 
 
-        [Test]
+        [Test, Category("Unit")]
         public void Garbage_collection()
         {
             AssertCacheEmpty();

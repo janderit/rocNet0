@@ -6,7 +6,7 @@ using System.Text;
 namespace LibTicker
 {
 
-    public interface TickerService
+    public interface TickerService : IDisposable
     {
         TickerService ListenTo(Guid subject);
         TickerService Filter(Guid trigger);

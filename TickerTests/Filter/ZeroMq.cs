@@ -31,7 +31,7 @@ namespace TickerTests.Filter
             _server.Shutdown();
         }
 
-        [Test]
+        [Test, Category("Unit"), Category("ZeroMQ")]
         public void No_filtering()
         {
             var subject1 = new Guid("690A2327-FDA5-4C50-886C-5AE17EF46829");
@@ -43,15 +43,19 @@ namespace TickerTests.Filter
             var publisher = Ticker.Publisher.ZeroMq("tcp://localhost:32991", "UnitTest");
             var listener = Ticker.Listener.ZeroMq("tcp://localhost:32992", "tcp://localhost:32993").Listener(ticks.Add);
 
+            Thread.Sleep(200);
+
             publisher.Publish(subject1, trigger1, "data1");
             publisher.Publish(subject2, trigger2, "data2");
 
             Thread.Sleep(200);
 
             Assert.AreEqual(2, ticks.Count);
+
+            listener.Dispose();
         }
 
-        [Test]
+        [Test, Category("Unit"), Category("ZeroMQ")]
         public void Filter_by_Subject()
         {
             var subject1 = new Guid("690A2327-FDA5-4C50-886C-5AE17EF46829");
@@ -73,9 +77,11 @@ namespace TickerTests.Filter
             Assert.AreEqual(subject2, tick.Subject);
             Assert.AreEqual(trigger2, tick.Trigger);
             Assert.AreEqual("data2", tick.Data);
+
+            listener.Dispose();
         }
 
-        [Test]
+        [Test, Category("Unit"), Category("ZeroMQ")]
         public void Filter_by_Trigger()
         {
             var subject1 = new Guid("690A2327-FDA5-4C50-886C-5AE17EF46829");
@@ -97,9 +103,11 @@ namespace TickerTests.Filter
             Assert.AreEqual(subject2, tick.Subject);
             Assert.AreEqual(trigger2, tick.Trigger);
             Assert.AreEqual("data2", tick.Data);
+
+            listener.Dispose();
         }
 
-        [Test]
+        [Test, Category("Unit"), Category("ZeroMQ")]
         public void Exclusive_configuration()
         {
             var subject1 = new Guid("690A2327-FDA5-4C50-886C-5AE17EF46829");
@@ -117,6 +125,8 @@ namespace TickerTests.Filter
             Thread.Sleep(100);
 
             Assert.AreEqual(0, ticks.Count);
+
+            listener.Dispose();
         }
 
     }

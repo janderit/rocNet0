@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -58,6 +59,8 @@ namespace LibTicker_zmq.Server
             var pubsub = _pubsub;
             if (pubsub == null) return;
 
+//            Trace.WriteLine("0MQ TICK XX " + tick.Serial + " " + tick.Subject + " " + tick.Trigger);
+
             Send(pubsub, Encode(tick));
         }
 
@@ -104,12 +107,11 @@ namespace LibTicker_zmq.Server
             }
             _log("POST from " + message[1]);
             _sink.Publish(new Guid(message[2]), new Guid(message[3]), message[4]);
-            socket.Send("200 ACCEPTED", Encoding.UTF8);
+            socket.Send("202 ACCEPTED", Encoding.UTF8);
         }
 
         public ZeroMqInMemoryTickerServer Start()
         {
-            LoopbackDevice.Reset();
             _thread = new Thread(Worker);
             _thread.Start();
             return this;
@@ -118,7 +120,9 @@ namespace LibTicker_zmq.Server
         private void Worker()
         {
             Thread.CurrentThread.IsBackground = true;
+            _log("Worker running");
             while (!_terminated) Context.Poller(new List<Socket> {_post, _outofband}.ToArray(), 10000);
+            _log("Worker terminated");
         }
 
         public void Shutdown()

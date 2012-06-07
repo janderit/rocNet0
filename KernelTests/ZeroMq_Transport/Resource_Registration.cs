@@ -55,7 +55,7 @@ namespace KernelTests.ZeroMq_Transport
             _kernel = null;
         }
 
-        [Test]
+        [Test, Category("ZeroMQ")]
         public void Chained()
         {
             Assert.AreEqual("Hello World", _kernel.Get("net://test").Body);

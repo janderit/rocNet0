@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Clients\CacheTickerAdapter.cs" />
     <Compile Include="Server\LoopbackDevice.cs" />
     <Compile Include="Clients\LoopbackListener.cs" />
     <Compile Include="Clients\LoopbackPublisher.cs" />

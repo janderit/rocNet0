@@ -95,8 +95,6 @@ namespace LibKernel_zmq
             _barrier = null;
         }
 
-        private List<CometHandler> _comets = new List<CometHandler>();
-
         private void Handler(Socket socket, IOMultiPlex revents)
         {
             try
@@ -104,12 +102,6 @@ namespace LibKernel_zmq
                 var id = socket.Recv();
                 DiscardEmptyLine(socket);
                 var datagram = socket.RecvAll(Encoding.UTF8);
-
-                if (_providerRouteScanEnabled && datagram.Count == 2 && datagram.First() == "@listen")
-                {
-                    _comets.Add(new CometHandler(id, new Guid(datagram.Skip(1).First())));
-                    return;
-                }
 
                 var request = _formatter.DeserializeRequest(datagram);
 

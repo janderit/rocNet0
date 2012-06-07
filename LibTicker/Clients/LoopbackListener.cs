@@ -15,7 +15,7 @@ namespace LibTicker.Clients
         private Subject<Tick> _observer;
         private readonly List<Guid> _subjects = new List<Guid>();
         private readonly List<Guid> _triggers = new List<Guid>();
-        private IDisposable _observation;
+        private readonly List<IDisposable> _observations = new List<IDisposable>();
 
         public LoopbackListener()
         {
@@ -48,7 +48,7 @@ namespace LibTicker.Clients
 
         public TickerService Listener(Action<Tick> listener)
         {
-            _observation = _observer.ObserveOn(Scheduler.TaskPool).Subscribe(listener);
+            _observations.Add(_observer.ObserveOn(Scheduler.TaskPool).Subscribe(listener));
             return this;
         }
 
@@ -65,9 +65,9 @@ namespace LibTicker.Clients
 
         public void Dispose()
         {
-            var oo = _observation;
-            _observation = null;
-            if (oo!=null) oo.Dispose();
+            var oo = _observations.ToList();
+            _observations.Clear();
+            oo.ForEach(_=>_.Dispose());
 
 
             var o = _observer;

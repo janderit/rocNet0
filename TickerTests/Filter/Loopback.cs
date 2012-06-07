@@ -26,7 +26,7 @@ namespace TickerTests.Filter
             LoopbackDevice.Reset();
         }
 
-        [Test]
+        [Test, Category("Unit"), Category("Loopback")]
         public void No_filtering()
         {
             var subject1 = new Guid("690A2327-FDA5-4C50-886C-5AE17EF46829");
@@ -46,7 +46,7 @@ namespace TickerTests.Filter
             Assert.AreEqual(2, ticks.Count);
         }
 
-        [Test]
+        [Test, Category("Unit"), Category("Loopback")]
         public void Filter_by_Subject()
         {
             var subject1 = new Guid("690A2327-FDA5-4C50-886C-5AE17EF46829");
@@ -70,7 +70,7 @@ namespace TickerTests.Filter
             Assert.AreEqual("data2", tick.Data);
         }
 
-        [Test]
+        [Test, Category("Unit"), Category("Loopback")]
         public void Filter_by_Trigger()
         {
             var subject1 = new Guid("690A2327-FDA5-4C50-886C-5AE17EF46829");
@@ -94,7 +94,7 @@ namespace TickerTests.Filter
             Assert.AreEqual("data2", tick.Data);
         }
 
-        [Test]
+        [Test, Category("Unit"), Category("Loopback")]
         public void Exclusive_configuration()
         {
             var subject1 = new Guid("690A2327-FDA5-4C50-886C-5AE17EF46829");

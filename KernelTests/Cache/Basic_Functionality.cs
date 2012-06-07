@@ -19,14 +19,14 @@ namespace KernelTests.Cache
             _cacheKernelAdapter = new ResourceCacheKernelAdapter(new SingleThreadedInMemoryCache());
         }
 
-        [Test]
+        [Test, Category("Negative")]
         public void Does_not_deliver_non_cached_item()
         {
             Assert.IsFalse(_cacheKernelAdapter.Match(Guid.NewGuid().ToString()));
         }
 
 
-        [Test]
+        [Test, Category("Unit")]
         public void Cache_unknown_resource()
         {
             var nri = "net://" + Guid.NewGuid();
@@ -58,7 +58,7 @@ namespace KernelTests.Cache
             Assert.IsNotNull(a);
         }
 
-        [Test]
+        [Test, Category("Unit")]
         public void Dont_cache_twice()
         {
             var nri = "net://" + Guid.NewGuid();
@@ -97,7 +97,7 @@ namespace KernelTests.Cache
             Assert.IsNotNull(b);
         }
 
-        [Test]
+        [Test, Category("Unit")]
         public void Cache_returns_copy_of_resource()
         {
             var nri = "net://" + Guid.NewGuid();

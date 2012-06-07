@@ -25,7 +25,7 @@ namespace KernelTests.Basic_Functionality
             _kernel.Reset();
         }
 
-        [Test]
+        [Test, Category("Smoke")]
         public void Smoke()
         {
             Assert.True(true);

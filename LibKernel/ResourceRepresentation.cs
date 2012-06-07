@@ -17,6 +17,7 @@ namespace LibKernel
             Via = new List<string>();
             RevokationTokens = new List<Guid>();
             Correlations = new List<Guid>();
+            Headers = new List<string>();
         }
 
 
@@ -36,5 +37,13 @@ namespace LibKernel
 
         public IEnumerable<string> Headers;
         public string Body;
+
+        public void AddHeader(string key, string value)
+        {
+            Headers = Headers.Union(new[] {Header(key, value)}).ToList();
+        }
+
+        public static string Header(string key, string value) { return string.Format("{0}: {1}", key, value); }
+
     }
 }

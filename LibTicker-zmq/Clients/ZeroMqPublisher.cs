@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using LibTicker;
 
@@ -18,6 +19,8 @@ namespace LibTicker_zmq.Clients
 
         public bool Publish(Guid subject, Guid trigger, string data)
         {
+//            Trace.WriteLine("0MQ TICK TX " + subject + " " + trigger);
+
             var resp = _conn.Transact(new[] {"POST", _ident ?? "ANONYMOUS", subject.ToString(), trigger.ToString(), data ?? ""}.ToList()).ToList();
             return resp.Count == 1 && (resp.Single() == "200 OK" || resp.Single() == "202 ACCEPTED");
         }

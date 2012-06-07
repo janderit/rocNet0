@@ -26,7 +26,7 @@ namespace TickerTests.Recall
             LoopbackDevice.Reset();
         }
 
-        [Test]
+        [Test, Category("Unit"), Category("Loopback")]
         public void No_recall()
         {
             var subject1 = new Guid("690A2327-FDA5-4C50-886C-5AE17EF46829");
@@ -49,7 +49,7 @@ namespace TickerTests.Recall
             Assert.AreEqual(0, ticks.Count);
         }
 
-        [Test]
+        [Test, Category("Unit"), Category("Loopback")]
         public void Recall()
         {
             var subject1 = new Guid("690A2327-FDA5-4C50-886C-5AE17EF46829");

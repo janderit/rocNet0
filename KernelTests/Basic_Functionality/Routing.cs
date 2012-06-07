@@ -27,21 +27,21 @@ namespace KernelTests.Basic_Functionality
             _kernel.Reset();
         }
 
-        [Test]
+        [Test, Category("Smoke")]
         public void Smoke()
         {
             _kernel.Routes.RegisterResourceHandler(Guid.NewGuid(), "net://test", 1, true, a => { throw new NotImplementedException(); });
             Assert.True(true);
         }
 
-        [Test,ExpectedException(typeof(ResourceNotFoundException))]
+        [Test, ExpectedException(typeof(ResourceNotFoundException)), Category("Negative")]
         public void FileNotFound()
         {
             _kernel.Get("net://nonesense.HJGASD");
             Assert.Fail();
         }
 
-        [Test]
+        [Test, Category("Unit")]
         public void Immediate()
         {
             _kernel.Routes.RegisterResourceHandler(Guid.NewGuid(), "net://test1", 1, true, a => new ResourceRepresentation
@@ -65,7 +65,7 @@ namespace KernelTests.Basic_Functionality
             Assert.AreEqual("TEST2", _kernel.Get("net://test2").Body);
         }
 
-        [Test, ExpectedException(typeof(ResourceNotFoundException))]
+        [Test, Category("Unit"), ExpectedException(typeof(ResourceNotFoundException))]
         public void Route_Removal()
         {
             _kernel.Routes.RegisterResourceHandler(Guid.NewGuid(), "net://test1", 1, true, a => new ResourceRepresentation
@@ -93,7 +93,7 @@ namespace KernelTests.Basic_Functionality
             Assert.Fail();
         }
 
-        [Test]
+        [Test, Category("Unit")]
         public void Simple_Regex()
         {
             _kernel.Routes.RegisterResourceHandlerRegex(Guid.NewGuid(), "^net://test.$", 1, true, a => new ResourceRepresentation

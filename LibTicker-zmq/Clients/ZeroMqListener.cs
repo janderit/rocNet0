@@ -14,35 +14,45 @@ namespace LibTicker_zmq.Clients
 {
     public class ZeroMqListener : TickerService, IDisposable
     {
+        private readonly string _inbandUri;
         private readonly string _outofbandUri;
         private Context _ctx;
-        private Socket _sock;
         private Subject<Tick> _subject;
         private readonly List<Guid> _subjects = new List<Guid>();
         private readonly List<Guid> _triggers = new List<Guid>();
         private Thread _worker;
         private bool _terminated;
         private bool _recvall=true;
+        private IDisposable _trace;
 
         public ZeroMqListener(string inbandUri, string outofbandUri)
         {
+            _inbandUri = inbandUri;
             _outofbandUri = outofbandUri;
 
             _ctx = new Context();
-            _sock = _ctx.Socket(SocketType.SUB);
-            _sock.PollInHandler += OnTick;
-            _sock.SetSockOpt(SocketOpt.SUBSCRIBE, Encoding.UTF8.GetBytes(""));
-            _sock.Connect(inbandUri);
+
             _subject = new Subject<Tick>();
             _subject.SubscribeOn(Scheduler.TaskPool);
+            _trace = _subject.Subscribe(tick => Trace.WriteLine("0MQ TICK rx " + tick.Serial + " " + tick.Subject + " " + tick.Trigger));
+
             _worker = new Thread(Worker);
             _worker.Start();
         }
 
         private void Worker()
         {
+            var sock = _ctx.Socket(SocketType.SUB);
+            sock.SetSockOpt(SocketOpt.SUBSCRIBE, new byte[] { });
+            sock.PollInHandler += OnTick;
+            sock.Connect(_inbandUri);
+
             Thread.CurrentThread.IsBackground = true;
-            while (!_terminated) Context.Poller(new List<Socket> { _sock }.ToArray(), 250000);
+//            Trace.WriteLine("0mq listener >> @ "+_inbandUri);
+            while (!_terminated) Context.Poller(new List<Socket> { sock }.ToArray(), 250000);
+            //Trace.WriteLine("0mq listener ##");
+
+            sock.Dispose();
         }
 
         private void OnTick(Socket socket, IOMultiPlex revents)
@@ -50,8 +60,8 @@ namespace LibTicker_zmq.Clients
             var data = socket.RecvAll(Encoding.UTF8).ToArray();
             if (data.Count() != 4) return;
 
-            Trace.Write("RECV ");
-            Trace.WriteLine(data[2]);
+//            Trace.Write("RECV ");
+//            Trace.WriteLine(data[2]);
 
             if (data[0].Length != 73) return;
 
@@ -90,7 +100,11 @@ namespace LibTicker_zmq.Clients
                                Data = data[3]
                            };
 
-            if (Filter(tick)) _subject.OnNext(tick);
+            if (Filter(tick))
+            {
+//                Trace.WriteLine("0MQ TICK RX " + tick.Serial + " " + tick.Subject + " " + tick.Trigger);
+                _subject.OnNext(tick);
+            }
         }
 
         public TickerService Listener(Action<Tick> listener)
@@ -101,15 +115,20 @@ namespace LibTicker_zmq.Clients
 
         public IObservable<Tick> AsObservable()
         {
-            return _subject;
+            var res = _subject.Publish();
+            res.Connect();
+            return res;
         }
 
         public void Dispose()
         {
             _terminated = true;
-            _sock.Dispose();
+            _worker.Join(TimeSpan.FromSeconds(10));
+
             _ctx.Dispose();
             _subject.OnCompleted();
+            _trace.Dispose();
+            _subject.Dispose();
         }
 
         public TickerService ListenTo(Guid subject)

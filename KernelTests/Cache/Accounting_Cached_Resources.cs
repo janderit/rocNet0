@@ -19,7 +19,7 @@ namespace KernelTests.Cache
             _cacheKernelAdapter = new ResourceCacheKernelAdapter(new SingleThreadedInMemoryCache());
         }
 
-        [Test]
+        [Test, Category("Unit")]
         public void Test()
         {
             var nri = "net://" + Guid.NewGuid();

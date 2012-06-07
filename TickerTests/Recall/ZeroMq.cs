@@ -21,6 +21,7 @@ namespace TickerTests.Recall
         [SetUp]
         public void StartServer()
         {
+            LoopbackDevice.Reset();
             _server = new ZeroMqInMemoryTickerServer("tcp://127.0.0.1:32991", "tcp://127.0.0.1:32992", "tcp://127.0.0.1:32993", s => Trace.WriteLine(s)).Start();
             Thread.Sleep(200);
         }
@@ -31,7 +32,7 @@ namespace TickerTests.Recall
             _server.Shutdown();
         }
 
-        [Test]
+        [Test, Category("Unit"), Category("ZeroMQ")]
         public void No_recall()
         {
             var subject1 = new Guid("690A2327-FDA5-4C50-886C-5AE17EF46829");
@@ -53,9 +54,11 @@ namespace TickerTests.Recall
             Thread.Sleep(100);
 
             Assert.AreEqual(0, ticks.Count);
+
+            listener.Dispose();
         }
 
-        [Test]
+        [Test, Category("Unit"), Category("ZeroMQ")]
         public void Recall()
         {
             var subject1 = new Guid("690A2327-FDA5-4C50-886C-5AE17EF46829");
@@ -76,6 +79,8 @@ namespace TickerTests.Recall
             Thread.Sleep(100);
 
             Assert.AreEqual(2, ticks.Count);
+
+            listener.Dispose();
         }
 
     }

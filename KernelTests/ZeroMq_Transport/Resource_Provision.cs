@@ -53,13 +53,13 @@ namespace KernelTests.ZeroMq_Transport
             _kernel = null;
         }
 
-        [Test]
+        [Test, Category("Smoke")]
         public void Loopback()
         {
             Assert.AreEqual("Hello World", _service.Get(new Request { NetResourceLocator = "net://test" }).Resource.Body);
         }
 
-        [Test]
+        [Test, Category("ZeroMQ")]
         public void Direct()
         {
             var prov = new ZeroMqResourceProviderConnector("tcp://localhost:15700");
@@ -67,7 +67,7 @@ namespace KernelTests.ZeroMq_Transport
             prov.Close();
         }
 
-        [Test]
+        [Test, Category("ZeroMQ")]
         public void Chained()
         {
             Assert.AreEqual("Hello World", _kernel.Get("net://test").Body);

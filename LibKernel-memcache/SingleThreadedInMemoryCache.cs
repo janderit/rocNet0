@@ -37,6 +37,7 @@ namespace LibKernel_memcache
             _cache.Add(resource.NetResourceIdentifier, new CacheEntry { Resource = resource,Hits=0, Last=DateTime.Now});
             _cachesize += resource.Size;
             _cacheenergy += resource.Energy;
+
             _keys.Add(resource.NetResourceIdentifier);
             if (!IsCanonical(response, request)) AddAliasIfUnknown(response, request);
 

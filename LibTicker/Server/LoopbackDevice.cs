@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using LibTicker.Clients;
@@ -19,7 +21,18 @@ namespace LibTicker.Server
         private static readonly ConcurrentQueue<Request> Requests = new ConcurrentQueue<Request>();
         private static readonly ConcurrentDictionary<long, Tick> Ticks = new ConcurrentDictionary<long, Tick>();
         private static Thread _runner;
-        internal static readonly Subject<Tick> Tickobserver = new Subject<Tick>();
+
+        private static Subject<Tick> _sub=new Subject<Tick>();
+
+        internal static IObservable<Tick> Tickobserver
+        {
+            get { 
+                var res = _sub.Publish();
+                res.Connect();
+                return res;
+            }
+        }
+
         private static readonly ManualResetEventSlim Barrier = new ManualResetEventSlim();
 
         internal static void EnsureActive()
@@ -31,8 +44,15 @@ namespace LibTicker.Server
         public static void Reset()
         {
             EnsureActive();
-            
+
+            while (Requests.Count>0)
+            {
+                Request dummy;
+                if (!Requests.TryDequeue(out dummy)) Thread.Yield();
+            }
             Ticks.Clear();
+
+            _sub = new Subject<Tick>();
 
             _memory = 0;
             _head = -1;
@@ -62,7 +82,6 @@ namespace LibTicker.Server
                         break;
                     }
 
-                    var size = 24 + (request.Data ?? "").Length;
                     var tick = new Tick
                                    {
                                        Subject = request.Subject,
@@ -86,7 +105,7 @@ namespace LibTicker.Server
 
                     Interlocked.Increment(ref _head);
 
-                    Tickobserver.OnNext(tick);
+                    _sub.OnNext(tick);
 
                     while (_memory > _memoryLimit) Purge();
                 }
@@ -99,7 +118,7 @@ namespace LibTicker.Server
 
         private static long Size(Tick tick)
         {
-            return 80 + tick.Data.Length;
+            return 80 + (tick.Data ?? "").Length;
         }
 
         internal static void Publish(Guid subject, Guid trigger, string data)

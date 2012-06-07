@@ -30,7 +30,7 @@ namespace KernelTests.Basic_Functionality
 
         private const string MyRegex = @"^net://fib/(?<i>[0-9]+)$";
 
-        [Test]
+        [Test, Category("Unit")]
         public void Fibonacci()
         {
             _kernel.Routes.RegisterResourceHandlerRegex(Guid.NewGuid(), MyRegex, 1, true, ServeFibonacci);
@@ -74,7 +74,7 @@ namespace KernelTests.Basic_Functionality
         }
 
 
-        [Test]
+        [Test, Category("RequiresConnectivity")]
         public void Google()
         {
             var provider = new ExternalWebrequestProvider();
@@ -85,7 +85,7 @@ namespace KernelTests.Basic_Functionality
         }
 
 
-        [Test]
+        [Test, Category("RequiresConnectivity")]
         public void Google_via_Map()
         {
             var provider = new ExternalWebrequestProvider();

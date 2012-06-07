@@ -59,6 +59,10 @@
       <Project>{FBDF24F4-D716-4C3F-8FCC-E4D6D6F02A65}</Project>
       <Name>LibKernel</Name>
     </ProjectReference>
+    <ProjectReference Include="..\LibTicker\LibTicker.csproj">
+      <Project>{BAD4419E-9609-430F-B62E-3468071B8644}</Project>
+      <Name>LibTicker</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

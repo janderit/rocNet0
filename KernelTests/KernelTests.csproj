@@ -50,9 +50,10 @@
     <Compile Include="Cache\Aliasing.cs" />
     <Compile Include="Cache\Basic_Functionality.cs" />
     <Compile Include="Cache\Cache_Limits.cs" />
+    <Compile Include="Cache\Kernel_Integration.cs" />
     <Compile Include="Cache\Invalidation.cs" />
+    <Compile Include="Cache\Ticker_Integration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ZeroMq_Transport\Provider_Registration.cs" />
     <Compile Include="ZeroMq_Transport\Resource_Access.cs" />
     <Compile Include="ZeroMq_Transport\Resource_Provision.cs" />
     <Compile Include="ZeroMq_Transport\Resource_Registration.cs" />
@@ -76,6 +77,10 @@
     <ProjectReference Include="..\LibKernel\LibKernel.csproj">
       <Project>{FBDF24F4-D716-4C3F-8FCC-E4D6D6F02A65}</Project>
       <Name>LibKernel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LibTicker\LibTicker.csproj">
+      <Project>{BAD4419E-9609-430F-B62E-3468071B8644}</Project>
+      <Name>LibTicker</Name>
     </ProjectReference>
     <ProjectReference Include="..\rocNet.Kernel\rocNet.Kernel.csproj">
       <Project>{9A57E26D-369C-4EF7-8B1E-7F2D5F86D8A8}</Project>
