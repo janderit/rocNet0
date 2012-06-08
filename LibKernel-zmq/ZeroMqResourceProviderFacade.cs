@@ -26,13 +26,6 @@ namespace LibKernel_zmq
             _context = new Context();
         }
 
-        public ZeroMqResourceProviderFacade EnableProviderRouteScan(ResourceRegistry registry)
-        {
-            if (registry == null) throw new ArgumentNullException("registry");
-            _providerRouteScanEnabled = true;
-            return this;
-        }
-
         public int IdleCheckInterval_ms = 10;
         private readonly Subject<long> _idleTick = new Subject<long>();
 
@@ -125,7 +118,6 @@ namespace LibKernel_zmq
         }
 
         private volatile bool _terminate = false;
-        private bool _providerRouteScanEnabled;
 
         private void Worker()
         {

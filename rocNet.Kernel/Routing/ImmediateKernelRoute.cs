@@ -7,7 +7,6 @@ namespace rocNet.Kernel.Routing
     internal class ImmediateKernelRoute : KernelRouteBase, KernelRoute
     {
         public readonly string Nri;
-        public readonly string Route;
 
         public Guid GroupId { get; private set; }
 

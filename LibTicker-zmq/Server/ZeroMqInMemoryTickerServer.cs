@@ -13,11 +13,7 @@ namespace LibTicker_zmq.Server
 {
     public class ZeroMqInMemoryTickerServer
     {
-        private readonly string _postUri;
-        private readonly string _pubsubUri;
-        private readonly string _outofbandUri;
         private readonly Action<string> _log;
-        private readonly string _uri;
         private Context _ctx;
         private Socket _post;
         private Socket _pubsub;
@@ -29,9 +25,6 @@ namespace LibTicker_zmq.Server
 
         public ZeroMqInMemoryTickerServer(string postUri, string pubsubUri, string outofbandUri, Action<string> log)
         {
-            _postUri = postUri;
-            _pubsubUri = pubsubUri;
-            _outofbandUri = outofbandUri;
             _log = log;
 
             _ctx = new Context();
