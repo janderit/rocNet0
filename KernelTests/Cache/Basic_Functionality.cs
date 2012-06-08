@@ -131,18 +131,19 @@ namespace KernelTests.Cache
             var cached = _cacheKernelAdapter.Handler(req);
 
             Assert.IsNotNull(cached);
+            Assert.IsNotNull(cached.Resource);
 
-            Assert.AreEqual(original.Body, cached.Body);
-            Assert.AreEqual(original.NetResourceIdentifier, cached.NetResourceIdentifier);
-            Assert.AreEqual(original.Cacheable, cached.Cacheable);
-            Assert.AreEqual(original.Energy, cached.Energy);
-            Assert.AreEqual(original.Expires, cached.Expires);
-            Assert.AreEqual(original.MediaType, cached.MediaType);
-            Assert.AreEqual(original.Modified, cached.Modified);
-            Assert.AreEqual(original.Size, cached.Size);
+            Assert.AreEqual(original.Body, cached.Resource.Body);
+            Assert.AreEqual(original.NetResourceIdentifier, cached.Resource.NetResourceIdentifier);
+            Assert.AreEqual(original.Cacheable, cached.Resource.Cacheable);
+            Assert.AreEqual(original.Energy, cached.Resource.Energy);
+            Assert.AreEqual(original.Expires, cached.Resource.Expires);
+            Assert.AreEqual(original.MediaType, cached.Resource.MediaType);
+            Assert.AreEqual(original.Modified, cached.Resource.Modified);
+            Assert.AreEqual(original.Size, cached.Resource.Size);
 
             original.Body = "MODIFIED";
-            Assert.AreNotEqual(original.Body, cached.Body);
+            Assert.AreNotEqual(original.Body, cached.Resource.Body);
 
         }
 

@@ -12,7 +12,7 @@ namespace LibKernel_memcache
         void ClearCache();
 
         bool Match(string nri);
-        ResourceRepresentation RetrieveOrNull(string nrl);
+        Response RetrieveOrNull(string nrl);
 
         bool CheckCachingStrategy(ResourceRepresentation resource);
 

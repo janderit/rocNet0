@@ -37,14 +37,14 @@ namespace LibKernel_http
                            Correlations = null,
                            Energy = Environment.TickCount - t0,
                            Expires = DateTime.Now.AddDays(1),
-                           Headers = wc.ResponseHeaders.AllKeys.Select(_ => "HTTP-"+ _ + ": " + wc.ResponseHeaders[_]),
+                           //Headers = wc.ResponseHeaders.AllKeys.Select(_ => "HTTP-"+ _ + ": " + wc.ResponseHeaders[_]),
                            MediaType = "text/html",
                            Modified = DateTime.Now,
                            NetResourceIdentifier = "net://www?url="+url,
                            Relations = null,
                            RevokationTokens = null,
                            Size = s.Length,
-                           Via = new[] {"WebrequestProvider v0.1"}.ToList()
+                           //Via = new[] {"WebrequestProvider v0.1"}.ToList()
                        /*}*/
                        };
         }

@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ResponseHeaders.cs" />
     <Compile Include="Exceptions\MediaFormatNotSupportedException.cs" />
     <Compile Include="Exceptions\MediaTypeException.cs" />
     <Compile Include="Exceptions\RouteUnavailableException.cs" />
@@ -58,7 +59,7 @@
     <Compile Include="Provider\MultithreadedResourceProviderFacade.cs" />
     <Compile Include="Provider\RouteInfo.cs" />
     <Compile Include="ResponseGuardExtension.cs" />
-    <Compile Include="ResponseHeaders.cs" />
+    <Compile Include="ResourceHeaders.cs" />
     <Compile Include="ResourceRegistry.cs" />
     <Compile Include="ResourceProvider.cs" />
     <Compile Include="MediaFormats\ZeroMqDatagramFormatter.cs" />
@@ -70,6 +71,7 @@
     <Compile Include="Response.cs" />
     <Compile Include="ResponseCode.cs" />
     <Compile Include="Routing\KernelRoute.cs" />
+    <Compile Include="Routing\KernelRouteBase.cs" />
     <Compile Include="Routing\RouteEntry.cs" />
     <Compile Include="Routing\RoutesInformation.cs" />
     <Compile Include="Routing\RoutesRequest.cs" />

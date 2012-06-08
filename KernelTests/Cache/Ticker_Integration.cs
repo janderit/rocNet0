@@ -80,7 +80,7 @@ namespace KernelTests.Cache
             _kernel.Routes.RegisterResourceHandler(Guid.NewGuid(), _nri1, 100, true, r=>DeliverResource(body,r));
 
             var reply1 = _kernel.Get(new Request { NetResourceLocator = _nri1, AcceptableMediaTypes = new[] { "*/*" } });
-            Assert.IsFalse(reply1.Resource.Headers.Any(_ => _.Contains("CACHE")));
+            Assert.AreEqual(XCache.Cached, reply1.XCache);
             Assert.AreEqual("Take1", reply1.Resource.Body);
 
 
@@ -90,7 +90,7 @@ namespace KernelTests.Cache
 
             var reply2 = _kernel.Get(new Request { NetResourceLocator = _nri1, AcceptableMediaTypes = new[] { "*/*" } });
 
-            Assert.IsTrue(reply2.Resource.Headers.Any(_ => _.Contains("CACHE")));
+            Assert.AreEqual(XCache.CacheHit, reply2.XCache);
             Assert.AreEqual("Take1", reply2.Resource.Body);
         }
 
@@ -105,7 +105,7 @@ namespace KernelTests.Cache
             
 
             var reply1 = _kernel.Get(new Request { NetResourceLocator = _nri1, AcceptableMediaTypes = new[] { "*/*" } });
-            Assert.IsFalse(reply1.Resource.Headers.Any(_ => _.Contains("CACHE")));
+            Assert.AreEqual(reply1.XCache, XCache.Cached);
             Assert.AreEqual("Take1", reply1.Resource.Body);
 
 //            System.Diagnostics.Trace.WriteLine("2a");
@@ -123,7 +123,7 @@ namespace KernelTests.Cache
 
 //            System.Diagnostics.Trace.WriteLine("2c");
 
-            Assert.IsFalse(reply2.Resource.Headers.Any(_ => _.Contains("CACHE")));
+            Assert.AreEqual(XCache.Cached, reply2.XCache);
             Assert.AreEqual("Take2", reply2.Resource.Body);
         }
 

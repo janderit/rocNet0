@@ -42,12 +42,12 @@ namespace kernel
             var cache = new CacheMultithreadingFacade(new SingleThreadedInMemoryCache());
             ResourceCacheKernelAdapter.AttachTo(_kernel, ResourceCacheKernelAdapter.GenerateFallback(_kernel.Get), cache);
 
-            cache.EnergySizeTradeoffFactor = 1;
-            cache.MinCachableEnergy = 2;
-            cache.MinimumExpirationTimesEnergyFactor = 4;
+            cache.EnergySizeTradeoffFactor = 4;
+            cache.MinCachableEnergy = 20;
+            cache.MinimumExpirationTimesEnergyFactor = 10;
 
             cache.MaxResourcesInCache = 60;
-            cache.RemovalChunkSize = 6;
+            cache.RemovalChunkSize = 10;
             cache.MaxCacheDurationSeconds = 30;
 
             var f = new MultithreadedResourceProviderFacade(_kernel) {InThreadHandlingLimit = Int64.MinValue};

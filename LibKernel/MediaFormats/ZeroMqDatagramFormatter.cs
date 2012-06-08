@@ -40,24 +40,26 @@ namespace LibKernel.MediaFormats
 
         public IEnumerable<string> Serialize(Response response)
         {
-            yield return ((int)response.Status).ToString()+" rocNet 1.0";
+            yield return ((int)response.Status)+" rocNet 1.0";
             if (response.Status == ResponseCode.Ok)
             {
-                yield return Header(ResponseHeaders.NetResourceIdentifier, response.Resource.NetResourceIdentifier);
-                yield return Header(ResponseHeaders.MediaType, response.Resource.MediaType);
-                yield return Header(ResponseHeaders.Modified, response.Resource.Modified.ToString("yyyy-MM-ddTHH:mm:sszzz"));
-                yield return Header(ResponseHeaders.Cacheable, response.Resource.Cacheable ? "YES" : "NO");
+                foreach (var h in response.Via) yield return Header(ResponseHeaders.Via, h);
+                yield return Header(ResponseHeaders.XCache,  ((int)response.XCache).ToString());
+
+                yield return Header(ResourceHeaders.NetResourceIdentifier, response.Resource.NetResourceIdentifier);
+                yield return Header(ResourceHeaders.MediaType, response.Resource.MediaType);
+                yield return Header(ResourceHeaders.Modified, response.Resource.Modified.ToString("yyyy-MM-ddTHH:mm:sszzz"));
+                yield return Header(ResourceHeaders.Cacheable, response.Resource.Cacheable ? "YES" : "NO");
                 if (response.Resource.Cacheable)
                 {
-                    if (response.Resource.Expires == DateTime.MaxValue) yield return Header(ResponseHeaders.Expires, "NEVER");
-                    else yield return Header(ResponseHeaders.Expires, response.Resource.Expires.ToString("yyyy-MM-ddTHH:mm:sszzz"));
+                    if (response.Resource.Expires == DateTime.MaxValue) yield return Header(ResourceHeaders.Expires, "NEVER");
+                    else yield return Header(ResourceHeaders.Expires, response.Resource.Expires.ToString("yyyy-MM-ddTHH:mm:sszzz"));
                 }
-                yield return Header(ResponseHeaders.Energy, response.Resource.Energy.ToString());
-                yield return Header(ResponseHeaders.Size, response.Resource.Size.ToString());
-                foreach (var h in response.Resource.Via??new List<string>()) yield return Header(ResponseHeaders.Via, h);
-                foreach (var h in response.Resource.Correlations ?? new List<Guid>()) yield return Header(ResponseHeaders.Correlation, h.ToString());
-                foreach (var h in response.Resource.RevokationTokens ?? new List<Guid>()) yield return Header(ResponseHeaders.Revokation, h.ToString());
-                foreach (var h in response.Resource.Relations ?? new List<string>()) yield return Header(ResponseHeaders.Relation, h);
+                yield return Header(ResourceHeaders.Energy, response.Resource.Energy.ToString());
+
+                foreach (var h in response.Resource.Correlations ?? new List<Guid>()) yield return Header(ResourceHeaders.Correlation, h.ToString());
+                foreach (var h in response.Resource.RevokationTokens ?? new List<Guid>()) yield return Header(ResourceHeaders.Revokation, h.ToString());
+                foreach (var h in response.Resource.Relations ?? new List<string>()) yield return Header(ResourceHeaders.Relation, h);
 
                 yield return "";
                 yield return response.Resource.Body;
@@ -112,33 +114,41 @@ namespace LibKernel.MediaFormats
 
             }
 
-            if (!headers.Any(_ => _.Header == ResponseHeaders.NetResourceIdentifier)) return Fail("Missing resource identifier in response");
-            if (!headers.Any(_ => _.Header == ResponseHeaders.Modified)) return Fail("Missing mtime in response");
-            if (!headers.Any(_ => _.Header == ResponseHeaders.MediaType)) return Fail("Missing media type in response");
-            if (!headers.Any(_ => _.Header == ResponseHeaders.Cacheable)) return Fail("Missing cacheable in response");
-            if (!headers.Any(_ => _.Header == ResponseHeaders.Energy)) return Fail("Missing energy in response");
-            if (!headers.Any(_ => _.Header == ResponseHeaders.Size)) return Fail("Missing size in response");
-
-            resource.Cacheable = headers.Single(_ => _.Header == ResponseHeaders.Cacheable).Value.ToLower().Trim() == "yes";
-            resource.Energy = Int32.Parse(headers.Single(_ => _.Header == ResponseHeaders.Energy).Value);
-            resource.Size = Int32.Parse(headers.Single(_ => _.Header == ResponseHeaders.Size).Value);
-            resource.MediaType = headers.Single(_ => _.Header == ResponseHeaders.MediaType).Value;
-            resource.Modified = DateTime.Parse(headers.Single(_ => _.Header == ResponseHeaders.Modified).Value);
-            if (headers.Any(_ => _.Header == ResponseHeaders.Expires))
+            if (!headers.Any(_ => _.Header == ResourceHeaders.NetResourceIdentifier)) return Fail("Missing resource identifier in response");
+            if (!headers.Any(_ => _.Header == ResourceHeaders.Modified)) return Fail("Missing mtime in response");
+            if (!headers.Any(_ => _.Header == ResourceHeaders.MediaType)) return Fail("Missing media type in response");
+            if (!headers.Any(_ => _.Header == ResourceHeaders.Cacheable)) return Fail("Missing cacheable in response");
+            if (!headers.Any(_ => _.Header == ResourceHeaders.Energy)) return Fail("Missing energy in response");
+            
+            resource.Cacheable = headers.Single(_ => _.Header == ResourceHeaders.Cacheable).Value.ToLower().Trim() == "yes";
+            resource.Energy = Int32.Parse(headers.Single(_ => _.Header == ResourceHeaders.Energy).Value);
+            resource.MediaType = headers.Single(_ => _.Header == ResourceHeaders.MediaType).Value;
+            resource.Modified = DateTime.Parse(headers.Single(_ => _.Header == ResourceHeaders.Modified).Value);
+            if (headers.Any(_ => _.Header == ResourceHeaders.Expires))
             {
-                var value = headers.Single(_ => _.Header == ResponseHeaders.Expires).Value;
+                var value = headers.Single(_ => _.Header == ResourceHeaders.Expires).Value;
                 if (value=="NEVER") resource.Expires = DateTime.MaxValue; 
                 else resource.Expires = DateTime.Parse(value);
             }
-            resource.NetResourceIdentifier= headers.Single(_ => _.Header == ResponseHeaders.NetResourceIdentifier).Value;
-            resource.Correlations = headers.Where(_=>_.Header==ResponseHeaders.Correlation).Select(_=>_.Value).Select(_=>new Guid(_)).ToList();
-            resource.Relations = headers.Where(_=>_.Header==ResponseHeaders.Relation).Select(_=>_.Value).ToList();
-            resource.RevokationTokens = headers.Where(_=>_.Header==ResponseHeaders.Revokation).Select(_=>_.Value).Select(_=>new Guid(_)).ToList();
-            resource.Via = headers.Where(_=>_.Header==ResponseHeaders.Via).Select(_=>_.Value).ToList();
+            resource.NetResourceIdentifier= headers.Single(_ => _.Header == ResourceHeaders.NetResourceIdentifier).Value;
+            resource.Correlations = headers.Where(_=>_.Header==ResourceHeaders.Correlation).Select(_=>_.Value).Select(_=>new Guid(_)).ToList();
+            resource.Relations = headers.Where(_=>_.Header==ResourceHeaders.Relation).Select(_=>_.Value).ToList();
+            resource.RevokationTokens = headers.Where(_=>_.Header==ResourceHeaders.Revokation).Select(_=>_.Value).Select(_=>new Guid(_)).ToList();
+            var vias = headers.Where(_ => _.Header == ResponseHeaders.Via).Select(_ => _.Value).ToList();
+            var xcache = headers.Where(_ => _.Header == ResponseHeaders.XCache).Select(_ => _.Value).SingleOrDefault()
+                         ?? ((int)XCache.None).ToString();
+
 
             resource.Body = body.Trim();
 
-            return new Response { Status=status, Information="Ok", Resource=resource };
+            return new Response
+                       {
+                           Status = status,
+                           Information = "Ok",
+                           Resource = resource,
+                           Via = vias,
+                           XCache = (XCache) Int32.Parse(xcache)
+                       };
         }
 
         private Response Fail(string info)

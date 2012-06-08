@@ -32,12 +32,21 @@ namespace LibKernel_memcache
 
             var resource = CloneResource(response);
 
-            resource.Headers = resource.Headers.Union(new[] {"X-CACHE: HIT"}).ToList();
+            response.XCache = XCache.Cached;
+            response.Via.Add("rocnet-memcache");
 
-            _cache.Add(resource.NetResourceIdentifier, new CacheEntry { Resource = resource,Hits=0, Last=DateTime.Now});
+            _cache.Add(resource.NetResourceIdentifier,
+                       new CacheEntry
+                           {
+                               Resource = resource,
+                               Hits = 0,
+                               Last = DateTime.Now,
+                               OriginalVia = response.Via.ToList(),
+                               OriginalRetrievalTime = response.RetrievalTimeMs
+                           });
             _cachesize += resource.Size;
-            _cacheenergy += resource.Energy;
-
+            _cacheenergy += resource.Energy + response.RetrievalTimeMs;
+            
             _keys.Add(resource.NetResourceIdentifier);
             if (!IsCanonical(response, request)) AddAliasIfUnknown(response, request);
 
@@ -76,7 +85,7 @@ namespace LibKernel_memcache
             var removed = _cache[nri];
             _cache.Remove(nri);
             _cachesize -= removed.Resource.Size;
-            _cacheenergy -= removed.Resource.Energy;
+            _cacheenergy -= removed.Resource.Energy + removed.OriginalRetrievalTime;
         }
 
         public void ClearCache()
@@ -140,7 +149,7 @@ namespace LibKernel_memcache
             return result;
         }
 
-        public ResourceRepresentation RetrieveOrNull(string nrl)
+        public Response RetrieveOrNull(string nrl)
         {
             try
             {
@@ -161,13 +170,14 @@ namespace LibKernel_memcache
                         Interlocked.Increment(ref _faults);
                         return null;
                 }
-                _deliveredenergy += entry.Resource.Energy;
+                _deliveredenergy += entry.Resource.Energy + entry.OriginalRetrievalTime;
                 entry.Hits++;
                 entry.Last = DateTime.Now;
-                return entry.Resource;
+                return new Response { Resource = entry.Resource , Information="", RetrievalTimeMs=0, Status=ResponseCode.Ok, Via=entry.OriginalVia.ToList(), XCache=XCache.CacheHit};
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 Interlocked.Increment(ref _faults);
                 return null;
             }
@@ -187,14 +197,12 @@ namespace LibKernel_memcache
                 Correlations = (response.Resource.Correlations ?? new List<Guid>()).ToList(),
                 Energy = response.Resource.Energy,
                 Expires = response.Resource.Expires,
-                Headers = (response.Resource.Headers ?? new List<string>()).Union(new[] { "X-Cache: HIT" }).ToList(),
                 MediaType = response.Resource.MediaType,
                 Modified = response.Resource.Modified,
                 NetResourceIdentifier = response.Resource.NetResourceIdentifier,
                 Relations = (response.Resource.Relations ?? new List<string>()),
                 RevokationTokens = (response.Resource.RevokationTokens ?? new List<Guid>()).ToList(),
                 Size = response.Resource.Size,
-                Via = (response.Resource.Via ?? new List<string>()).Union(new[] { "rocNet-memcache" }).ToList()
             };
         }
 

@@ -13,14 +13,14 @@ namespace LibKernel_memcache
 
         private readonly ICacheResources _cache;
         private static KernelRegistration _kernel;
-        private static Func<Request, ResourceRepresentation> _fallback;
+        private static Func<Request, Response> _fallback;
 
         public ResourceCacheKernelAdapter(ICacheResources cache)
         {
             _cache = cache;
         }
 
-        public static ResourceCacheKernelAdapter AttachTo(KernelRegistration kernel, Func<Request, ResourceRepresentation> fallback, ICacheResources backend)
+        public static ResourceCacheKernelAdapter AttachTo(KernelRegistration kernel, Func<Request, Response> fallback, ICacheResources backend)
         {
             if (fallback == null) throw new ArgumentNullException("fallback");
             var cache = new ResourceCacheKernelAdapter(backend)
@@ -46,6 +46,12 @@ namespace LibKernel_memcache
             get { return 1; }
         }
 
+        public long DeliveryTime
+        {
+            get { return 1; }
+            set { }
+        }
+
         public bool IsAuthoritative
         {
             get { return false; }
@@ -56,7 +62,7 @@ namespace LibKernel_memcache
             return _cache.Match(nri);
         }
         
-        public Func<Request, ResourceRepresentation> Handler
+        public Func<Request, Response> Handler
         {
             get { return req => _cache.RetrieveOrNull(req.NetResourceLocator) ?? _fallback(req); }
         }
@@ -66,7 +72,7 @@ namespace LibKernel_memcache
         {
             if (response.Status!=ResponseCode.Ok) return response;
 
-            if (response.Resource.Cacheable && !(response.Resource.Headers??new List<string>()).Contains("X-CACHE: HIT") && !_cache.Match(response.Resource.NetResourceIdentifier))
+            if (response.Resource.Cacheable && response.XCache!=XCache.Cached && !_cache.Match(response.Resource.NetResourceIdentifier))
             {
                 _cache.AddToCache(request, response);
             }
@@ -90,7 +96,7 @@ namespace LibKernel_memcache
         }
 
 
-        public static Func<Request, ResourceRepresentation> GenerateFallback(Func<Request, Response> get)
+        public static Func<Request, Response> GenerateFallback(Func<Request, Response> get)
         {
             return req => get(new Request
                                   {

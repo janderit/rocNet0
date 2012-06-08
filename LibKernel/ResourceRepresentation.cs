@@ -14,17 +14,14 @@ namespace LibKernel
             Modified = DateTime.Now;
 
             Relations = new List<string>();
-            Via = new List<string>();
             RevokationTokens = new List<Guid>();
-            Correlations = new List<Guid>();
-            Headers = new List<string>();
+            Correlations = new List<Guid>();            
         }
 
 
         public string NetResourceIdentifier;
         public string MediaType;
         public IEnumerable<string> Relations;
-        public IEnumerable<string> Via;
         public long Energy;
         public int Size;
 
@@ -34,16 +31,6 @@ namespace LibKernel
         public bool Cacheable;
         public DateTime Modified;
         public DateTime Expires;
-
-        public IEnumerable<string> Headers;
         public string Body;
-
-        public void AddHeader(string key, string value)
-        {
-            Headers = Headers.Union(new[] {Header(key, value)}).ToList();
-        }
-
-        public static string Header(string key, string value) { return string.Format("{0}: {1}", key, value); }
-
     }
 }

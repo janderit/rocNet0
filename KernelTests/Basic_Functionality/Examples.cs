@@ -61,13 +61,11 @@ namespace KernelTests.Basic_Functionality
                            Cacheable = true,
                            Correlations = null,
                            Expires = DateTime.MaxValue,
-                           Headers = null,
                            MediaType = "text/longint",
                            Modified = DateTime.Now,
                            NetResourceIdentifier = "net://fib/" + p,
                            Relations = null,
                            RevokationTokens = null,
-                           Via = null,
                            Energy = Environment.TickCount - t0,
                            Size=result.ToString().Length
                        };

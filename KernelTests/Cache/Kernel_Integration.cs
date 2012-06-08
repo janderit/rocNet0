@@ -48,17 +48,16 @@ namespace KernelTests.Cache
         }
 
         [Test, Category("Integration")]
-        public void Cache_ignores_noncachable_Resources_delivered_by_kernel()
+        public void Kernel_does_not_try_to_cache_noncachable_Resources_delivered_by_kernel()
         {
 
             _kernel.Routes.RegisterResourceHandler(Guid.NewGuid(), nri1, 100, true, r => DeliverResource(false, r));
 
             var reply1 = _kernel.Get(new Request {NetResourceLocator = nri1, AcceptableMediaTypes = new[] {"*/*"}});
-            Assert.IsFalse(reply1.Resource.Headers.Any(_ => _.Contains("CACHE")));
+            Assert.AreEqual(XCache.None, reply1.XCache);
 
             var reply2 = _kernel.Get(new Request {NetResourceLocator = nri1, AcceptableMediaTypes = new[] {"*/*"}});
-            Assert.IsFalse(reply2.Resource.Headers.Any(_ => _.Contains("CACHE")));
-
+            Assert.AreEqual(XCache.None, reply2.XCache);
         }
         
         [Test, Category("Integration")]
@@ -68,10 +67,10 @@ namespace KernelTests.Cache
             _kernel.Routes.RegisterResourceHandler(Guid.NewGuid(), nri1, 100, true, r => DeliverResource(true, r));
 
             var reply1 = _kernel.Get(new Request { NetResourceLocator = nri1, AcceptableMediaTypes = new[] { "*/*" } });
-            Assert.IsFalse(reply1.Resource.Headers.Any(_ => _.Contains("CACHE")));
+            Assert.AreEqual(XCache.Cached, reply1.XCache);
 
             var reply2 = _kernel.Get(new Request { NetResourceLocator = nri1, AcceptableMediaTypes = new[] { "*/*" } });
-            Assert.IsTrue(reply2.Resource.Headers.Any(_ => _.Contains("CACHE")));
+            Assert.AreEqual(XCache.CacheHit, reply2.XCache);
 
         }
 
@@ -82,10 +81,10 @@ namespace KernelTests.Cache
             _kernel.Routes.RegisterResourceHandler(Guid.NewGuid(), nri1, 100, true, r => DeliverResource(true, r));
 
             var reply1 = _kernel.Get(new Request { NetResourceLocator = nri1, AcceptableMediaTypes = new[] { "*/*" } });
-            Assert.IsFalse(reply1.Resource.Headers.Any(_ => _.Contains("CACHE")));
+            Assert.AreEqual(XCache.Cached, reply1.XCache);
 
             var reply2 = _kernel.Get(new Request {NetResourceLocator = nri1, AcceptableMediaTypes = new[] {"*/*"}, IgnoreCached = true});
-            Assert.IsFalse(reply2.Resource.Headers.Any(_ => _.Contains("CACHE")));
+            Assert.AreEqual(XCache.None, reply2.XCache);
 
         }
 

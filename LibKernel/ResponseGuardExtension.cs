@@ -9,11 +9,12 @@ namespace LibKernel
 {
     public static class ResponseGuardExtension
     {
-        public static ResourceRepresentation Guard(this Response response, Action<ResponseCode, string> onError=null)
+        public static Response Guard(this Response response, Action<ResponseCode, string> onError=null)
         {
             if (response == null) throw new ArgumentNullException("response");
 
-            if (response.Status==ResponseCode.Ok) return response.Resource;
+            if (response.Status == ResponseCode.Ok && response.Resource==null) throw ResourceUnavailableException.Create("Internal error, missing resource", "");
+            if (response.Status==ResponseCode.Ok) return response;
 
             if (onError != null) onError(response.Status, response.Information);
 

@@ -5,9 +5,12 @@ namespace LibKernel.Routing
     public interface KernelRoute
     {
         Guid GroupId { get; }
-        long Energy { get; }
+        long DeliveryTime { get; set; }
         bool Match(string nri);
         bool IsAuthoritative { get; }
-        Func<Request, ResourceRepresentation> Handler { get; }
+        Func<Request, Response> Handler { get; }
     }
+
+
+
 }

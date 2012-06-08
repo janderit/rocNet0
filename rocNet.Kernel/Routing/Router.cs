@@ -44,17 +44,17 @@ namespace rocNet.Kernel.Routing
         {
             var providerid = Guid.NewGuid();
 
-            RegisterResourceHandler(providerid, RoutesRequest.Get(providerid).NetResourceLocator,energy, isAuthoritative,  _=>provider.Get(RoutesRequest.GetGlobal()).Guard());
+            RegisterResourceHandler(providerid, RoutesRequest.Get(providerid).NetResourceLocator,energy, isAuthoritative,  _=>provider.Get(RoutesRequest.GetGlobal()).Guard().Resource);
 
             _provider.Add(providerid, provider);
             var routeresource = _kernel.Get(RoutesRequest.Get(providerid)).Guard();
 
-            var routelist = MediaFormatter<RoutesInformation>.Parse(routeresource, RoutesInformation.Mediatype);
+            var routelist = MediaFormatter<RoutesInformation>.Parse(routeresource.Resource, RoutesInformation.Mediatype);
 
             foreach (var routeEntry in routelist.Routes)
             {
-                if (!String.IsNullOrEmpty(routeEntry.Identifier)) RegisterResourceForwarder(providerid, IdentifierToRegex(routeEntry.Identifier), provider, routeEntry.Energy + routeresource.Energy);
-                else RegisterResourceForwarder(providerid, routeEntry.Regex, provider, routeEntry.Energy + routeresource.Energy);
+                if (!String.IsNullOrEmpty(routeEntry.Identifier)) RegisterResourceForwarder(providerid, IdentifierToRegex(routeEntry.Identifier), provider, routeEntry.DeliveryTime + routeresource.Resource.Energy);
+                else RegisterResourceForwarder(providerid, routeEntry.Regex, provider, routeEntry.DeliveryTime + routeresource.Resource.Energy);
             }
         }
 
@@ -73,8 +73,8 @@ namespace rocNet.Kernel.Routing
 
         private IEnumerable<RouteEntry> PublicRoutes()
         {
-            var ri = _routes.OfType<ImmediateKernelRoute>().Select(_=>new RouteEntry{Identifier=_.Nri, Energy = _.Energy});
-            ri = ri.Union(_routes.OfType<RegexKernelRoute>().Select(_ => new RouteEntry { Regex = _.NriRegex, Energy = _.Energy }));
+            var ri = _routes.OfType<ImmediateKernelRoute>().Select(_=>new RouteEntry{Identifier=_.Nri, DeliveryTime = _.DeliveryTime});
+            ri = ri.Union(_routes.OfType<RegexKernelRoute>().Select(_ => new RouteEntry { Regex = _.NriRegex, DeliveryTime = _.DeliveryTime }));
             return ri.ToList();
         }
 
@@ -95,7 +95,8 @@ namespace rocNet.Kernel.Routing
 
         public IEnumerable<KernelRoute> Lookup(string nri, bool ignorecache)
         {
-            return _routes.Where(_=>!ignorecache||_.IsAuthoritative).Where(_ => _.Match(nri)).OrderBy(_ => _.Energy).ToList();
+            return _routes.Where(_=>!ignorecache||_.IsAuthoritative).Where(_ => _.Match(nri)).OrderBy(_ => _.DeliveryTime).ToList();
+
         }
 
 

@@ -55,7 +55,7 @@ namespace KernelTests.Cache
             var a = _cacheKernelAdapter.Handler(req);
             var b = _cacheKernelAdapter.Handler(req2);
             Assert.IsNotNull(a);
-            Assert.AreSame(a,b);
+            Assert.AreSame(a.Resource,b.Resource);
         }
     }
 }

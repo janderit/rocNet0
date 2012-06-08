@@ -8,7 +8,7 @@ using LibKernel.Routing;
 
 namespace rocNet.Kernel.Routing
 {
-    internal class ForwardKernelRoute : KernelRoute
+    internal class ForwardKernelRoute : KernelRouteBase, KernelRoute
     {
         private readonly ResourceProvider _provider;
         private readonly Regex _regex;
@@ -19,11 +19,10 @@ namespace rocNet.Kernel.Routing
             _regex = new Regex(nriregex);
             _provider = provider;
             GroupId = routeGroupId;
-            Energy = energy; 
+            DeliveryTime = energy; 
         }
 
         public Guid GroupId { get; private set; }
-        public long Energy { get; private set; }
 
         public bool Match(string nri)
         {
@@ -32,17 +31,19 @@ namespace rocNet.Kernel.Routing
 
         public bool IsAuthoritative { get; private set; }
 
-        public Func<Request, ResourceRepresentation> Handler
+        public Func<Request, Response> Handler
         {
             get { return Handle; }
         }
 
-        private ResourceRepresentation Handle(Request arg)
+        private Response Handle(Request arg)
         {
             var t0 = Environment.TickCount;
             var x = _provider.Get(arg).Guard();
             var t1 = Environment.TickCount;
-            if (Energy < t1 - t0) Energy = t1 - t0;
+
+            x.RetrievalTimeMs = t1 - t0;
+
             return x;
         }
     }

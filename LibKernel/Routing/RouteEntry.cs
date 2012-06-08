@@ -11,6 +11,6 @@ namespace LibKernel.Routing
         [XmlText]
         public string Regex { get; set; }
         [XmlAttribute]
-        public long Energy { get; set; }
+        public long DeliveryTime { get; set; }
     }
 }

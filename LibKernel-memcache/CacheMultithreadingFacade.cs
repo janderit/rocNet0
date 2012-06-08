@@ -21,7 +21,11 @@ namespace LibKernel_memcache
 
         public void AddToCache(Request request, Response response)
         {
-            if (!_cache.CheckCachingStrategy(response.Resource)) return;
+            if (!_cache.CheckCachingStrategy(response.Resource))
+            {
+                if (response.XCache==XCache.None) response.XCache = XCache.Ignored;
+                return;
+            }
             Enqueue(new AddToCacheCommand { Request = request, Response = new Response { Status = ResponseCode.Ok, Resource = response.Resource } });
         }
         public void ClearCache() { Enqueue(new ClearCacheCommand()); }
@@ -121,7 +125,7 @@ namespace LibKernel_memcache
 
 
         public bool Match(string nrl) { return _cache.Match(nrl); }
-        public ResourceRepresentation RetrieveOrNull(string nrl) { return _cache.RetrieveOrNull(nrl); }
+        public Response RetrieveOrNull(string nrl) { return _cache.RetrieveOrNull(nrl); }
 
         public int MaxResourcesInCache { set { _cache.MaxResourcesInCache = value; } }
         public int RemovalChunkSize { set { _cache.RemovalChunkSize = value; } }

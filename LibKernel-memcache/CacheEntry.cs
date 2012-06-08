@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using LibKernel;
 
 namespace LibKernel_memcache
@@ -8,5 +9,7 @@ namespace LibKernel_memcache
         internal ResourceRepresentation Resource;
         internal int Hits;
         internal DateTime Last;
+        internal List<string> OriginalVia;
+        internal int OriginalRetrievalTime;
     }
 }

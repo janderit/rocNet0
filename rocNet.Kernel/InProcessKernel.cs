@@ -201,7 +201,9 @@ namespace rocNet.Kernel
                         routes.RemoveAt(0);
                         continue;
                     }
-                    resp = new Response { Status = ResponseCode.Ok, Information = "Ok", Resource = res };
+
+                    var t1 = Environment.TickCount;
+                    resp = new Response { Status = ResponseCode.Ok, Information = res.Information, Resource = res.Resource, RetrievalTimeMs=t1-s.Start, Via=res.Via.Union(new []{""}).ToList() , XCache=res.XCache};
                     break;
                 }
 
@@ -209,6 +211,11 @@ namespace rocNet.Kernel
                 {
                     s.ok = true;
                     s.nri = resp.Resource.NetResourceIdentifier;
+                    if (routes.Count > 0)
+                    {
+                        if (routes[0].DeliveryTime+15 < resp.RetrievalTimeMs) routes[0].DeliveryTime++;
+                        if (routes[0].DeliveryTime-30 > resp.RetrievalTimeMs) routes[0].DeliveryTime--;
+                    }
                 }
 
                 s.Ticks = Environment.TickCount - s.Start;
